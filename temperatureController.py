@@ -85,8 +85,7 @@ while current_time - start < duration:
 			outputs[i].append(temp)
 		update_plot()
 		out_file.write(data + '\n')
-		time.sleep(1)
-		# calculates correct pausing time
+		time.sleep(1) 
 
 print(current_time-start)
 out_file.close()
