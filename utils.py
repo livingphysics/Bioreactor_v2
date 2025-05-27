@@ -1,6 +1,7 @@
 import csv
 
 def create_csv_writer(out_file):
+    raise NotImplementedError("This function is not implemented")
     fieldnames = ['time', 'current', 'tube_out', 'tube_in', 'flask_1', 'flask_2']
     writer = csv.DictWriter(out_file, fieldnames=fieldnames)
     writer.writeheader()
@@ -15,6 +16,7 @@ def measure_and_write_sensor_data(bioreactor, writer, elapsed):
         writer: csv.DictWriter object
         elapsed: float, elapsed time in seconds
     """
+    raise NotImplementedError("This function is not implemented")
     current = bioreactor.get_current()
     temperatures = bioreactor.get_temp()
     

@@ -58,9 +58,9 @@ with open('data/temperature_training_4.txt', 'w', newline='') as out_file:
         error.append(dT)
         signal = min(100,(kp*abs(dT)+ki*sum(error)))
         if dT>0:
-            bioreactor.peltier.run(signal, forward=True)
+            bioreactor.change_peltier(signal, forward=True)
         else:
-            bioreactor.peltier.run(signal, forward=False)
+            bioreactor.change_peltier(signal, forward=False)
         print(signal)
         times.append(elapsed)
         for i, temp in enumerate(temperature):
@@ -71,5 +71,4 @@ with open('data/temperature_training_4.txt', 'w', newline='') as out_file:
 
         elapsed = time.time() - start
 
-bioreactor.peltier.cleanup()
-cleanup_gpio()
+bioreactor.finish()
