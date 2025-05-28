@@ -13,7 +13,7 @@ NUM_POINTS = 10            # number of test points
 DURATION = 20.0            # seconds per test
 
 FLASK_CAPACITY = 50.0      # ml
-ML_PER_STEP_ESTIMATE = 0.002  # ml per step estimate
+raise NotImplementedError("ML_PER_STEP_ESTIMATE must be determined experimentally")
 SERIAL_PORT_SCALE = "/dev/serial0"
 BAUDRATE = 9600
 TOLERANCE = 0.001         # g tolerance for stability
