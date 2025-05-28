@@ -43,12 +43,47 @@ class Config:
 
     # Pump Configuration
     PUMPS: dict[str, dict[str, Union[str, float]]] = {
-        'tube_1_in':  {'port': '/dev/ttyACM0', 'gradient': 0.002, 'intercept': 0.0},
-        'tube_1_out': {'port': '/dev/ttyACM1', 'gradient': 0.002, 'intercept': 0.0},
-        'tube_2_in':  {'port': '/dev/ttyACM2', 'gradient': 0.002, 'intercept': 0.0},
-        'tube_2_out': {'port': '/dev/ttyACM3', 'gradient': 0.002, 'intercept': 0.0},
-        'tube_3_in':  {'port': '/dev/ttyACM4', 'gradient': 0.002, 'intercept': 0.0},
-        'tube_3_out': {'port': '/dev/ttyACM5', 'gradient': 0.002, 'intercept': 0.0},
-        'tube_4_in':  {'port': '/dev/ttyACM6', 'gradient': 0.002, 'intercept': 0.0},
-        'tube_4_out': {'port': '/dev/ttyACM7', 'gradient': 0.002, 'intercept': 0.0},
+        'tube_1_in':  {'serial': 'SERIAL1', 'gradient': 0.002, 'intercept': 0.0},
+        'tube_1_out': {'serial': 'SERIAL2', 'gradient': 0.002, 'intercept': 0.0},
+        'tube_2_in':  {'serial': 'SERIAL3', 'gradient': 0.002, 'intercept': 0.0},
+        'tube_2_out': {'serial': 'SERIAL4', 'gradient': 0.002, 'intercept': 0.0},
+        'tube_3_in':  {'serial': 'SERIAL5', 'gradient': 0.002, 'intercept': 0.0},
+        'tube_3_out': {'serial': 'SERIAL6', 'gradient': 0.002, 'intercept': 0.0},
+        'tube_4_in':  {'serial': 'SERIAL7', 'gradient': 0.002, 'intercept': 0.0},
+        'tube_4_out': {'serial': 'SERIAL8', 'gradient': 0.002, 'intercept': 0.0},
+    }
+
+    # Initialization Components
+    INIT_COMPONENTS: dict[str, bool] = {
+        'leds': True,
+        'pumps': True,
+        'ring_light': True,
+        'optical_density': True,
+        'temp': True,
+        'peltier': True,
+        'stirrer': True
+    }
+
+    LOG_FILE: str = 'bioreactor.log'
+
+    SENSOR_LABELS: dict = {
+        'photodiode_1': 'vial_1_180_degree',
+        'photodiode_2': 'vial_1_135_degree',
+        'photodiode_3': 'vial_2_180_degree',
+        'photodiode_4': 'vial_2_135_degree',
+        'photodiode_5': 'vial_3_180_degree',
+        'photodiode_6': 'vial_3_135_degree',
+        'photodiode_7': 'vial_4_180_degree',
+        'photodiode_8': 'vial_4_135_degree',
+        'photodiode_9': 'spare_1',
+        'photodiode_10': 'spare_2',
+        'photodiode_11': 'spare_3',
+        'photodiode_12': 'spare_4',
+        'io_temp_1': 'io_temp_1',
+        'io_temp_2': 'io_temp_2',
+        'vial_temp_1': 'vial_1_temp',
+        'vial_temp_2': 'vial_2_temp',
+        'vial_temp_3': 'vial_3_temp',
+        'vial_temp_4': 'vial_4_temp',
+        'peltier_current': 'peltier_current',
     }

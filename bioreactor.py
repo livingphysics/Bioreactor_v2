@@ -9,6 +9,8 @@ import board
 from config import Config as cfg
 import RPi.GPIO as IO
 import logging
+import threading
+import csv
 
 from typing import List, Tuple, Optional, Union
 import busio
@@ -29,309 +31,371 @@ class Bioreactor():
     """Class to manage all sensors and operations for the bioreactor"""
     
     def __init__(self) -> None:
-        """Initialize all sensors and store them as instance attributes"""
+        """Initialize selected hardware components based on init_components dict."""
+
+        self.cfg = cfg
+
+        self.logger = logging.getLogger("Bioreactor")
+        self.logger.setLevel(getattr(cfg, 'LOG_LEVEL', 'INFO'))
+        if hasattr(cfg, 'LOG_FILE') and cfg.LOG_FILE:
+            handler = logging.FileHandler(cfg.LOG_FILE)
+        else:
+            handler = logging.StreamHandler()
+        formatter = logging.Formatter(cfg.LOG_FORMAT)
+        handler.setFormatter(formatter)
+        if not self.logger.hasHandlers():
+            self.logger.addHandler(handler)
+        self.logger.info("Initializing Bioreactor...")
+
+        self._init_components = {k: cfg.INIT_COMPONENTS.get(k, True) for k in cfg.INIT_COMPONENTS}
+        self._initialized = {}
+
+        # I2C (required for several components)
+        if any([self._init_components.get(k, True) for k in ['pumps', 'optical_density', 'peltier']]):
+            try:
+                self.i2c = busio.I2C(board.SCL, board.SDA)
+                self._initialized['i2c'] = True
+                self.logger.info("I2C initialized.")
+            except Exception as e:
+                self.logger.error(f"I2C initialization failed: {e}")
+                self._initialized['i2c'] = False
+
+        # LEDs
+        if self._init_components.get('leds', True):
+            try:
+                self.board_mode = cfg.LED_MODE.upper()
+                self.led_pin = cfg.LED_PIN
+                if self.board_mode == 'BOARD':
+                    IO.setmode(IO.BOARD)
+                elif self.board_mode == 'BCM':
+                    self.led_pin = cfg.BCM_MAP[self.led_pin]
+                    IO.setmode(IO.BCM)
+                else:
+                    raise ValueError("Invalid board mode: use 'BCM' or 'BOARD'")
+                IO.setup(self.led_pin, IO.OUT)
+                IO.output(self.led_pin, 0)
+                self._initialized['leds'] = True
+                self.logger.info("LEDs initialized.")
+            except Exception as e:
+                self.logger.error(f"LEDs initialization failed: {e}")
+                self._initialized['leds'] = False
+
+        # Stirrer
+        if self._init_components.get('stirrer', True):
+            try:
+                IO.setup(cfg.STIRRER_PIN, IO.OUT)
+                self.stirrer = IO.PWM(cfg.STIRRER_PIN, cfg.STIRRER_SPEED)
+                self.stirrer.start(0)
+                self.stirrer.ChangeDutyCycle(cfg.DUTY_CYCLE)
+                self._initialized['stirrer'] = True
+                self.logger.info("Stirrer initialized.")
+            except Exception as e:
+                self.logger.error(f"Stirrer initialization failed: {e}")
+                self._initialized['stirrer'] = False
+
+        # Ring Light
+        if self._init_components.get('ring_light', True):
+            try:
+                self.ring_light = neopixel.NeoPixel(board.D10, cfg.RING_LIGHT_COUNT, brightness=cfg.RING_LIGHT_BRIGHTNESS, auto_write=False)
+                self.change_ring_light((0,0,0))
+                self._initialized['ring_light'] = True
+                self.logger.info("Ring light initialized.")
+            except Exception as e:
+                self.logger.error(f"Ring light initialization failed: {e}")
+                self._initialized['ring_light'] = False
+
+        # Optical Density
+        if self._init_components.get('optical_density', True):
+            try:
+                self.adc_1 = ADC.ADS7830(self.i2c, address=cfg.ADC_1_ADDRESS)
+                self.REF_1 = cfg.ADC_1_REF_VOLTAGE
+                self.adc_2 = ADC.ADS7830(self.i2c, address=cfg.ADC_2_ADDRESS)
+                self.REF_2 = cfg.ADC_2_REF_VOLTAGE
+                self._initialized['optical_density'] = True
+                self.logger.info("Optical density sensors initialized.")
+            except Exception as e:
+                self.logger.error(f"Optical density initialization failed: {e}")
+                self._initialized['optical_density'] = False
+
+        # Temp sensors
+        if self._init_components.get('temp', True):
+            try:
+                self.vial_temp_sensors = np.array(DS18B20.get_all_sensors())[cfg.VIAL_TEMP_SENSOR_ORDER]
+                self._initialized['temp'] = True
+                self.logger.info("Temperature sensors initialized.")
+            except Exception as e:
+                self.logger.error(f"Temperature sensors initialization failed: {e}")
+                self._initialized['temp'] = False
+
+        # Peltier
+        if self._init_components.get('peltier', True):
+            try:
+                self.peltier_curr_sensor = INA219(self.i2c)
+                IO.setup(cfg.PELTIER_PWM_PIN, IO.OUT)
+                IO.setup(cfg.PELTIER_DIR_PIN, IO.OUT)
+                self.pwm = IO.PWM(cfg.PELTIER_PWM_PIN, cfg.PELTIER_PWM_FREQ)
+                self.pwm.start(0)
+                self._initialized['peltier'] = True
+                self.logger.info("Peltier initialized.")
+            except Exception as e:
+                self.logger.error(f"Peltier initialization failed: {e}")
+                self._initialized['peltier'] = False
+
+        # Pumps
+        if self._init_components.get('pumps', True):
+            try:
+                self.pumps = {}
+                self.calibration = {}
+                for name, settings in cfg.PUMPS.items():
+                    serial = settings['serial']
+                    tic = TicUSB(serial=serial)
+                    tic.energize()
+                    tic.exit_safe_start()
+                    tic.set_step_mode(3)
+                    tic.set_current_limit(32)
+                    self.pumps[name] = tic
+                    self.calibration[name] = {
+                        'gradient': settings['gradient'],
+                        'intercept': settings['intercept']
+                    }
+                    self.logger.info(f"Pump {name} initialized (serial {serial}).")
+                self._initialized['pumps'] = True
+            except Exception as e:
+                self.logger.error(f"Pump initialization failed: {e}")
+                self._initialized['pumps'] = False
+
+        # For PID
+        self._temp_integral = 0.0
+        self._temp_last_error = 0.0
+
+        # Threading
+        self._threads = []
+        self._stop_event = threading.Event()
+
+        # Set up CSV writer for sensor data using SENSOR_LABELS
+        sensor_keys = (
+            [f'photodiode_{i+1}' for i in range(12)] +
+            [f'io_temp_{i+1}' for i in range(2)] +
+            [f'vial_temp_{i+1}' for i in range(4)] +
+            ['peltier_current']
+        )
+        fieldnames = ['time'] + [cfg.SENSOR_LABELS[k] for k in sensor_keys]
+        self.fieldnames = fieldnames
+        out_file_path = getattr(cfg, 'DATA_OUT_FILE', 'bioreactor_data.csv')
+        self.out_file = open(out_file_path, 'w', newline='')
+        self.writer = csv.DictWriter(self.out_file, fieldnames=fieldnames)
+        self.writer.writeheader()
+
+        self.logger.info("Bioreactor initialization complete.")
+
+    # Utility methods for hardware actions
+
+    def change_led(self, state: bool) -> None:
+        if not self._initialized.get('leds'):
+            return
+        
         try:
-            self.init_i2c()
-            self.init_leds()
-            self.init_stirrer()
-            self.init_ring_light()
-            self.init_optical_density()
-            self.init_temp()
-            self.init_peltier()
-            self.init_pumps()
-        except OSError as e:
-            logging.error(f"Hardware initialization error: {e}")
-            raise
+            IO.output(self.led_pin, 1 if state else 0)
+            self.logger.info(f"LEDs turned {'ON' if state else 'OFF'}.")
         except Exception as e:
-            logging.error(f"Some (probably non-hardware) error during initialization: {e}")
+            self.logger.error(f"Error changing LED state: {e}")
             raise
 
-    def init_i2c(self) -> None:
-        """Initialize the I2C bus"""
-        self.i2c = busio.I2C(board.SCL, board.SDA)
-    
-    def init_leds(self) -> None:
-        """Initialize the LEDs"""
-        # Board mode must be the same for leds and peltier
-        self.board_mode = cfg.LED_MODE.upper()
-        self.led_pin = cfg.LED_PIN
-        if self.board_mode == 'BOARD':
-            IO.setmode(IO.BOARD)
-        elif self.board_mode == 'BCM':
-            self.led_pin = cfg.BCM_MAP[self.led_pin]
-            IO.setmode(IO.BCM)
-        else:
-            raise ValueError("Invalid board mode: use 'BCM' or 'BOARD'")
-        IO.setup(self.led_pin, IO.OUT)
-        IO.output(self.led_pin, 0)
-    
-    def init_stirrer(self) -> None:
-        """Initialize the stirrer"""
-        IO.setup(cfg.STIRRER_PIN, IO.OUT)
-        self.stirrer = IO.PWM(cfg.STIRRER_PIN, cfg.STIRRER_SPEED)
-        self.stirrer.start(0)
-        self.stirrer.ChangeDutyCycle(cfg.DUTY_CYCLE)
-    
-    def init_ring_light(self) -> None:
-        """Initialize the ring light"""
-        self.ring_light = neopixel.NeoPixel(board.D10, cfg.RING_LIGHT_COUNT, brightness=cfg.RING_LIGHT_BRIGHTNESS, auto_write=False)
-        self.change_ring_light((0,0,0))
-    
-    def init_optical_density(self) -> None:
-        """Initialize the optical density sensors and input/output temp sensors"""
-        # ADS7830 setup
-        self.adc_1: ADC.ADS7830 = ADC.ADS7830(self.i2c, address=cfg.ADC_1_ADDRESS)
-        self.REF_1: float = cfg.ADC_1_REF_VOLTAGE
-        self.adc_2: ADC.ADS7830 = ADC.ADS7830(self.i2c, address=cfg.ADC_2_ADDRESS)
-        self.REF_2: float = cfg.ADC_2_REF_VOLTAGE
-    
-    def init_temp(self) -> None:
-        """Initialize the external temperature sensors"""
-        self.vial_temp_sensors: np.ndarray = np.array(DS18B20.get_all_sensors())[cfg.VIAL_TEMP_SENSOR_ORDER]
-    
-    def init_peltier(self) -> None:
-        """Initialize the peltier"""
-        self.peltier_curr_sensor = INA219(self.i2c)
-
-        IO.setup(cfg.PELTIER_PWM_PIN, IO.OUT)
-        IO.setup(cfg.PELTIER_DIR_PIN, IO.OUT)
+    def change_ring_light(self, color, pixel=None) -> None:
+        if not self._initialized.get('ring_light'):
+            return
         
-        self.pwm = IO.PWM(cfg.PELTIER_PWM_PIN, cfg.PELTIER_PWM_FREQ)
-        self.pwm.start(0)
-    
-    def init_pumps(self) -> None:
-        """
-        Initialize TicUSB controllers for each pump defined in `Config.PUMPS`.
-        Store calibration (gradient, intercept) for conversion.
-        """
-        self.pumps: dict[str, TicUSB] = {}
-        self.calibration: dict[str, dict[str, float]] = {}
+        try:
+            if pixel is None:
+                self.ring_light.fill(color)
+            else:
+                self.ring_light[pixel] = color
+            self.ring_light.show()
+            self.logger.info(f"Ring light changed to {color} (pixel {pixel}).")
+        except Exception as e:
+            self.logger.error(f"Error changing ring light: {e}")
+            raise
 
-        for name, settings in cfg.PUMPS.items():
-            port = settings['port']
-            tic = TicUSB(port=port)
-            tic.energize()
-            tic.exit_safe_start()
-            self.pumps[name] = tic
-            # Store gradient & intercept for ml/sec = gradient*steps/sec + intercept
-            self.calibration[name] = {
-                'gradient': settings['gradient'],
-                'intercept': settings['intercept']
-            }
-
-    def led_on(self) -> None:
-        """Turn on the LED"""
-        IO.output(self.led_pin, 1)
-
-    def led_off(self) -> None:
-        """Turn off the LED"""
-        IO.output(self.led_pin, 0)
-    
-    def change_ring_light(self, color: Tuple[int, int, int], pixel: Optional[int] = None) -> None:
-        """Change the color of the ring light"""
-        if pixel is None:
-            self.ring_light.fill(color)
-        else:
-            self.ring_light[pixel] = color
-        self.ring_light.show()
-    
-    def change_peltier(self, power: int, forward: bool):
-        """Change the peltier power and direction"""
-        IO.output(cfg.PELTIER_DIR_PIN, IO.HIGH if forward else IO.LOW)
+    def change_peltier(self, power: int, forward: bool) -> None:
+        """Change the peltier power and direction.
         
-        # power arg is now 0-100 (duty cycle percentage)
-        self.pwm.ChangeDutyCycle(power)
-
-    def change_pumps_rate(self, pump_name: str, ml_per_sec: float) -> None:
-        """
-        Set a pump to achieve a target volumetric flow (ml/sec).
-
-        Uses:
-            ml_per_sec = gradient * (steps_per_sec) + intercept
-        => steps_per_sec = (ml_per_sec - intercept) / gradient
-
         Args:
-            pump_name: key in `self.pumps` (e.g. 'tube_1_in')
-            ml_per_sec: Desired volumetric rate in ml/sec (>= 0)
+            power (int): Power level from 0-100 (duty cycle percentage)
+            forward (bool): Direction of peltier (True for forward, False for reverse)
         """
+        if not self._initialized.get('peltier'):
+            return
+            
+        try:
+            IO.output(self.cfg.PELTIER_DIR_PIN, IO.HIGH if forward else IO.LOW)
+            self.pwm.ChangeDutyCycle(power)
+            self.logger.info(f"Peltier set to {power}% power, direction: {'forward' if forward else 'reverse'}")
+        except Exception as e:
+            self.logger.error(f"Error changing peltier: {e}")
+            raise
+
+    def change_pump(self, pump_name: str, ml_per_sec: float) -> None:
+        if not self._initialized.get('pumps'):
+            return
         if pump_name not in self.pumps:
             raise ValueError(f"No pump named '{pump_name}' configured")
-
+        
         cal = self.calibration[pump_name]
-        # Compute steps/sec from ml/sec
         steps_per_sec = int((ml_per_sec - cal['intercept']) / cal['gradient'])
-        # Determine direction: inlet pumps forward, outlet pumps reverse
         forward = pump_name.endswith('_in')
         velocity = steps_per_sec if forward else -steps_per_sec
 
         try:
             self.pumps[pump_name].set_target_velocity(velocity)
+            self.logger.info(f"Set pump {pump_name} to {ml_per_sec} ml/sec (velocity {velocity}).")
         except Exception as e:
-            logging.error(f"Error setting velocity for '{pump_name}': {e}")
+            self.logger.error(f"Error setting velocity for '{pump_name}': {e}")
             raise
 
-    def finish(self) -> None:
-        """Clean up resources"""
-        IO.output(self.led_pin, 0)
-        self.stirrer.stop(0)
-        self.change_ring_light((0,0,0))
-        self.pwm.ChangeDutyCycle(0)
-        IO.cleanup()
-        if hasattr(self, 'pump'):
-            self.pump.deenergize()
-            self.pump.enter_safe_start()
-
-    def get_photodiodes(self) -> List[float]:
-        """Get the photodiodes readings"""
-        try:
-            return [self.adc_1.read(i) * self.REF_1 / 65535.0 for i in cfg.ADC_1_PHOTODIODE_CHANNELS] + [self.adc_2.read(i) * self.REF_2 / 65535.0 for i in cfg.ADC_2_PHOTODIODE_CHANNELS]
-        except OSError as e:
-            logging.error(f"Hardware error reading photodiodes: {e}")
+    def get_photodiodes(self):
+        if not self._initialized.get('optical_density'):
             return [float('nan')] * 12
-        except Exception as e:
-            logging.error(f"Unexpected error reading photodiodes: {e}")
-            return [float('nan')] * 12
-    
-    def get_io_temp(self) -> List[float]:
-        """Get the input/output temperature readings"""
+        
         try:
-            return [self.adc_1.read(i) * self.REF_1 / 65535.0 for i in cfg.ADC_1_IO_TEMP_CHANNELS] + [self.adc_2.read(i) * self.REF_2 / 65535.0 for i in cfg.ADC_2_IO_TEMP_CHANNELS]
-        except OSError as e:
-            logging.error(f"Hardware error reading input/output temperature: {e}")
-            return [float('nan')] * 2
+            return [self.adc_1.read(i) * self.REF_1 / 65535.0 for i in self.cfg.ADC_1_PHOTODIODE_CHANNELS] + [self.adc_2.read(i) * self.REF_2 / 65535.0 for i in self.cfg.ADC_2_PHOTODIODE_CHANNELS]
         except Exception as e:
-            logging.error(f"Unexpected error reading input/output temperature: {e}")
+            self.logger.error(f"Error reading photodiodes: {e}")
+            return [float('nan')] * 12
+        
+    def get_io_temp(self):
+        if not self._initialized.get('optical_density'):
             return [float('nan')] * 2
-    
-    def get_vial_temp(self) -> List[float]:
-        """Get the temperature readings"""
+        
+        try:
+            return [self.adc_1.read(i) * self.REF_1 / 65535.0 for i in self.cfg.ADC_1_IO_TEMP_CHANNELS] + [self.adc_2.read(i) * self.REF_2 / 65535.0 for i in self.cfg.ADC_2_IO_TEMP_CHANNELS]
+        except Exception as e:
+            self.logger.error(f"Error reading IO temp: {e}")
+            return [float('nan')] * 2
+        
+    def get_vial_temp(self):
+        if not self._initialized.get('temp'):
+            return [float('nan')]
+        
         try:
             return [vial_temp_sensor.get_temperature() for vial_temp_sensor in self.vial_temp_sensors]
-        except OSError as e:
-            logging.error(f"Hardware error reading temperature: {e}")
-            return [float('nan')] * len(self.vial_temp_sensors)
         except Exception as e:
-            logging.error(f"Unexpected error reading temperature: {e}")
+            self.logger.error(f"Error reading vial temp: {e}")
             return [float('nan')] * len(self.vial_temp_sensors)
-    
-    def get_peltier_curr(self) -> float:
-        """Get the current reading"""
+        
+    def get_peltier_curr(self):
+        if not self._initialized.get('peltier'):
+            return float('nan')
+        
         try:
             return self.peltier_curr_sensor.current / 1000
-        except:
+        except Exception as e:
+            self.logger.error(f"Error reading peltier current: {e}")
             return float('nan')
-    
-    def balanced_flow(self, pump_name: str, ml_per_sec: float) -> None:
+
+    # Threaded scheduling
+
+    def run(self, jobs):
         """
-        For a given pump, set its flow and automatically set the converse pump
-        to the same volumetric rate in the opposite direction.
-
-        E.g. if pump_name is 'tube_1_in', the converse is 'tube_1_out'.
-
-        Args:
-            pump_name: e.g. 'tube_1_in' or 'tube_1_out'
-            ml_per_sec: Desired flow rate in ml/sec (>= 0)
+        jobs: list of (function, frequency, duration) tuples.
+        Each function is called with self (or bioreactor_instance) as first argument.
+        Non-blocking: returns immediately after starting threads.
+        If duration is True, the job runs indefinitely until stop_all() is called.
         """
-        # Find converse pump by swapping suffix
-        if pump_name.endswith('_in'):
-            converse = pump_name[:-3] + 'out'
-        elif pump_name.endswith('_out'):
-            converse = pump_name[:-4] + 'in'
-        else:
-            raise ValueError("Pump name must end with '_in' or '_out'")
+        self._stop_event.clear()
 
-        # Set both pumps
-        self.change_pumps_rate(pump_name, ml_per_sec)
-        self.change_pumps_rate(converse, ml_per_sec)
-    
-    def pid_temp_controller(
-        self,
-        setpoint: float,
-        current_temp: Optional[float] = None,
-        kp: float = 10.0,
-        ki: float = 1.0,
-        kd: float = 0.0,
-        dt: float = 1.0
-    ) -> None:
-        """
-        PID loop to maintain reactor temperature at `setpoint`.
+        self._threads = []
+        def thread_worker(func, freq, dur):
+            start = time.time()
+            while not self._stop_event.is_set() and (dur is True or time.time() - start < dur):
+                t0 = time.time()
 
-        Args:
-            setpoint: Desired temperature (°C)
-            current_temp: Measured temp (°C). If None, reads from first vial sensor.
-            kp, ki, kd: PID gains (defaults from temperatureController.py).
-            dt: Time elapsed since last call (s, default 1s).
-        """
-        # Read temperature if not provided
-        if current_temp is None:
-            temps = self.get_vial_temp()
-            current_temp = temps[0]
+                try:
+                    global_elapsed = time.time() - start
+                    func(self, elapsed=global_elapsed)
+                except Exception as e:
+                    self.logger.error(f"Exception in thread for {func.__name__}: {e}")
 
-        # PID calculations
-        error = setpoint - current_temp
-        self._temp_integral += error * dt
-        derivative = (error - self._temp_last_error) / dt if dt > 0 else 0.0
-        output = kp * error + ki * self._temp_integral + kd * derivative
+                if freq is True:
+                    continue
 
-        # Clamp output to [0,100] for PWM duty cycle
-        duty = max(0, min(100, int(abs(output))))
-        # Determine direction: True=heat (forward), False=cool (reverse)
-        forward = output >= 0
-        self.change_peltier(duty, forward)
+                loop_elapsed = time.time() - t0
+                sleep_time = max(0, freq - loop_elapsed)
+                if sleep_time > 0:
+                    time.sleep(sleep_time)
 
-        # Store for next iteration
-        self._temp_last_error = error
+        for func, freq, dur in jobs:
+            th = threading.Thread(target=thread_worker, args=(func, freq, dur))
+            th.daemon = True
+            th.start()
+            self._threads.append(th)
 
-    def chemostat_mode(
-        self,
-        pump_name: str,
-        flow_rate_ml_s: float,
-        temp_setpoint: float,
-        kp: float = 10.0,
-        ki: float = 1.0,
-        kd: float = 0.0,
-        dt: float = 1.0
-    ) -> None:
-        """
-        Run the reactor in chemostat mode:
-        - Balanced flow on the specified pump.
-        - PID temperature control (defaults from temperatureController.py).
+        self.logger.info(f"Started {len(jobs)} job threads.")
 
-        Args:
-            pump_name: e.g. 'tube_1_in' or 'tube_1_out'
-            flow_rate_ml_s: Inflow/outflow rate (ml/sec)
-            temp_setpoint: Desired temperature (°C)
-            kp, ki, kd: PID gains (defaults 10,1,0)
-            dt: Time step for PID loop (s, default 1s).
-        """
-        # Maintain flow
-        self.balanced_flow(pump_name, flow_rate_ml_s)
-        # Maintain temperature
-        self.pid_temp_controller(
-            setpoint=temp_setpoint,
-            kp=kp,
-            ki=ki,
-            kd=kd,
-            dt=dt
-        )
+    def stop_all(self):
+        self._stop_event.set()
+        self.logger.info("Stop event set for all threads.")
 
-    @contextmanager
-    def led_context(self, settle_time: float = 1.0):
-        """Context manager for LED control"""
+    def finish(self) -> None:
+        self.logger.info("Cleaning up Bioreactor...")
+
+        # Stop all threads
+        self.stop_all()
+
+        # LEDs
+        if self._initialized.get('leds'):
+            try:
+                IO.output(self.led_pin, 0)
+            except Exception:
+                self.logger.error("Error turning off LEDs.")
+
+        # Stirrer
+        if self._initialized.get('stirrer'):
+            try:
+                self.stirrer.stop(0)
+            except Exception:
+                self.logger.error("Error stopping stirrer.")
+
+        # Ring Light
+        if self._initialized.get('ring_light'):
+            try:
+                self.change_ring_light((0,0,0))
+            except Exception:
+                self.logger.error("Error turning off ring light.")
+
+        # Peltier
+        if self._initialized.get('peltier'):
+            try:
+                self.pwm.ChangeDutyCycle(0)
+            except Exception:
+                self.logger.error("Error stopping peltier.")
+
+        # Pumps
+        if self._initialized.get('pumps'):
+            try:
+                for tic in self.pumps.values():
+                    tic.deenergize()
+                    tic.enter_safe_start()
+            except Exception:
+                self.logger.error("Error stopping pumps.")
+
+        # GPIO cleanup
+        if self._initialized.get('leds') or self._initialized.get('stirrer') or self._initialized.get('peltier'):
+            try:
+                IO.cleanup()
+            except Exception:
+                self.logger.error("Error cleaning up GPIO.")
+
+        # Always call cleanup_gpio if available
         try:
-            # Turn IR LEDs on and wait for signal to settle
-            self.led_on()
-            time.sleep(settle_time)
-            yield
-        finally:
-            # Turn IR LEDs off
-            self.led_off()
-    
+            cleanup_gpio()
+        except Exception:
+            self.logger.error("Error calling cleanup_gpio().")
+
+        self.logger.info("Bioreactor cleanup complete.")
+
     def __enter__(self):
-        """Enter the context manager"""
         return self
     
     def __exit__(self, exc_type, exc_value, traceback):
-        """Exit the context manager"""
         self.finish()
         return False
