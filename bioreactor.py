@@ -146,8 +146,14 @@ class Bioreactor():
             try:
                 self.pumps = {}
                 self.calibration = {}
+                self.pump_direction = {}
                 for name, settings in cfg.PUMPS.items():
                     serial = settings['serial']
+                    direction = settings.get('direction')
+                    if direction not in ('forward', 'reverse'):
+                        raise ValueError(f"Pump {name} must have direction set to 'forward' or 'reverse'")
+                    if 'forward' not in settings or 'reverse' not in settings:
+                        raise ValueError(f"Pump {name} must have both 'forward' and 'reverse' calibration settings")
                     tic = TicUSB(serial=serial)
                     tic.energize()
                     tic.exit_safe_start()
@@ -155,10 +161,11 @@ class Bioreactor():
                     tic.set_current_limit(32)
                     self.pumps[name] = tic
                     self.calibration[name] = {
-                        'gradient': settings['gradient'],
-                        'intercept': settings['intercept']
+                        'forward': settings['forward'],
+                        'reverse': settings['reverse']
                     }
-                    self.logger.info(f"Pump {name} initialized (serial {serial}).")
+                    self.pump_direction[name] = direction
+                    self.logger.info(f"Pump {name} initialized (serial {serial}, direction {direction}).")
                 self._initialized['pumps'] = True
             except Exception as e:
                 self.logger.error(f"Pump initialization failed: {e}")
@@ -239,15 +246,24 @@ class Bioreactor():
             return
         if pump_name not in self.pumps:
             raise ValueError(f"No pump named '{pump_name}' configured")
-        
-        cal = self.calibration[pump_name]
-        steps_per_sec = int((ml_per_sec - cal['intercept']) / cal['gradient'])
-        forward = pump_name.endswith('_in')
-        velocity = steps_per_sec if forward else -steps_per_sec
-
+        if ml_per_sec < 0:
+            raise ValueError("ml_per_sec must be positive")
+        direction = self.pump_direction.get(pump_name)
+        if direction not in ('forward', 'reverse'):
+            raise ValueError(f"Pump {pump_name} has invalid direction configuration")
+        cal = self.calibration[pump_name].get(direction)
+        if cal is None:
+            raise ValueError(f"Calibration for direction '{direction}' not found for pump '{pump_name}'")
+        gradient = cal.get('gradient')
+        intercept = cal.get('intercept')
+        if gradient is None or intercept is None:
+            raise ValueError(f"Calibration for pump '{pump_name}' direction '{direction}' missing 'gradient' or 'intercept'")
+        steps_per_sec = int((ml_per_sec - intercept) / gradient)
+        # Set velocity sign: positive if direction is 'forward', negative if 'reverse'
+        velocity = steps_per_sec if direction == 'forward' else -steps_per_sec
         try:
             self.pumps[pump_name].set_target_velocity(velocity)
-            self.logger.info(f"Set pump {pump_name} to {ml_per_sec} ml/sec (velocity {velocity}).")
+            self.logger.info(f"Set pump {pump_name} to {ml_per_sec} ml/sec (velocity {velocity}, direction {direction}).")
         except Exception as e:
             self.logger.error(f"Error setting velocity for '{pump_name}': {e}")
             raise

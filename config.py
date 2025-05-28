@@ -42,15 +42,55 @@ class Config:
     LOG_FORMAT: str = '%(asctime)s - %(levelname)s - %(message)s'
 
     # Pump Configuration
-    PUMPS: dict[str, dict[str, Union[str, float]]] = {
-        'tube_1_in':  {'serial': 'SERIAL1', 'gradient': 0.002, 'intercept': 0.0},
-        'tube_1_out': {'serial': 'SERIAL2', 'gradient': 0.002, 'intercept': 0.0},
-        'tube_2_in':  {'serial': 'SERIAL3', 'gradient': 0.002, 'intercept': 0.0},
-        'tube_2_out': {'serial': 'SERIAL4', 'gradient': 0.002, 'intercept': 0.0},
-        'tube_3_in':  {'serial': 'SERIAL5', 'gradient': 0.002, 'intercept': 0.0},
-        'tube_3_out': {'serial': 'SERIAL6', 'gradient': 0.002, 'intercept': 0.0},
-        'tube_4_in':  {'serial': 'SERIAL7', 'gradient': 0.002, 'intercept': 0.0},
-        'tube_4_out': {'serial': 'SERIAL8', 'gradient': 0.002, 'intercept': 0.0},
+    PUMPS: dict[str, dict[str, Union[str, float, dict]]] = {
+        'tube_1_in':  {
+            'serial': 'SERIAL1',
+            'direction': 'forward',  # user-set: 'forward' or 'reverse'
+            'forward': {'gradient': 0.002, 'intercept': 0.0},
+            'reverse': {'gradient': 0.002, 'intercept': 0.0},
+        },
+        'tube_1_out': {
+            'serial': 'SERIAL2',
+            'direction': 'reverse',
+            'forward': {'gradient': 0.002, 'intercept': 0.0},
+            'reverse': {'gradient': 0.002, 'intercept': 0.0},
+        },
+        'tube_2_in':  {
+            'serial': 'SERIAL3',
+            'direction': 'forward',
+            'forward': {'gradient': 0.002, 'intercept': 0.0},
+            'reverse': {'gradient': 0.002, 'intercept': 0.0},
+        },
+        'tube_2_out': {
+            'serial': 'SERIAL4',
+            'direction': 'reverse',
+            'forward': {'gradient': 0.002, 'intercept': 0.0},
+            'reverse': {'gradient': 0.002, 'intercept': 0.0},
+        },
+        'tube_3_in':  {
+            'serial': 'SERIAL5',
+            'direction': 'forward',
+            'forward': {'gradient': 0.002, 'intercept': 0.0},
+            'reverse': {'gradient': 0.002, 'intercept': 0.0},
+        },
+        'tube_3_out': {
+            'serial': 'SERIAL6',
+            'direction': 'reverse',
+            'forward': {'gradient': 0.002, 'intercept': 0.0},
+            'reverse': {'gradient': 0.002, 'intercept': 0.0},
+        },
+        'tube_4_in':  {
+            'serial': 'SERIAL7',
+            'direction': 'forward',
+            'forward': {'gradient': 0.002, 'intercept': 0.0},
+            'reverse': {'gradient': 0.002, 'intercept': 0.0},
+        },
+        'tube_4_out': {
+            'serial': 'SERIAL8',
+            'direction': 'reverse',
+            'forward': {'gradient': 0.002, 'intercept': 0.0},
+            'reverse': {'gradient': 0.002, 'intercept': 0.0},
+        },
     }
 
     # Initialization Components
