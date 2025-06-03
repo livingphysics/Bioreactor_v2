@@ -34,7 +34,7 @@ def read_stable_weight(ser: serial.Serial):
     """
     prev = None
     while True:
-        ser.write(b's')
+        ser.write(b'w')
         raw = ser.read(18)
         try:
             text = raw.decode('ascii', errors='ignore')
