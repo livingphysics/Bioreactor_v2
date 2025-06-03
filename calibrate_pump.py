@@ -2,7 +2,7 @@ import time
 import csv
 import numpy as np
 import serial
-from ticlib import TicSerial
+from ticlib import TicUSB
 import re
 from config import Config
 
@@ -12,8 +12,11 @@ STEPS_MAX = 100000         # steps/sec maximum
 NUM_POINTS = 10            # number of test points
 DURATION = 20.0            # seconds per test
 
+DENSITY_OF_WATER = 1.0     # g/ml
 FLASK_CAPACITY = 50.0      # ml
-raise NotImplementedError("ML_PER_STEP_ESTIMATE must be determined experimentally")
+STEP_MODE = 3             # step mode
+STEPS_PER_PULSE = 0.5 ** STEP_MODE     # steps/pulse
+ML_PER_STEP_ESTIMATE = 0.001        # ml/step (estimated empirically, make sure this is greater than actual value)
 SERIAL_PORT_SCALE = "/dev/serial0"
 BAUDRATE = 9600
 TOLERANCE = 0.001         # g tolerance for stability
@@ -50,8 +53,8 @@ def read_stable_weight(ser: serial.Serial):
         time.sleep(0.1)
 
 def calibrate_single_pump(pump_serial, direction):
-    rates = np.logspace(np.log10(STEPS_MIN), np.log10(STEPS_MAX), NUM_POINTS)
-    rates = np.unique(rates.astype(int))
+    steps_rates = np.logspace(np.log10(STEPS_MIN), np.log10(STEPS_MAX), NUM_POINTS)
+    steps_rates = np.unique(steps_rates.astype(int))
 
     # Open serial for scale
     scale_ser = serial.Serial(port=SERIAL_PORT_SCALE,
@@ -62,7 +65,7 @@ def calibrate_single_pump(pump_serial, direction):
                               timeout=READ_TIMEOUT)
 
     # Initialize pump via TTL serial
-    pump = TicSerial(serial=pump_serial)  # auto-detect port
+    pump = TicUSB(serial_number=pump_serial)  # auto-detect port
     pump.energize()
     pump.exit_safe_start()
     pump.set_step_mode(3)
@@ -71,10 +74,10 @@ def calibrate_single_pump(pump_serial, direction):
     csv_filename = f"pump_{pump_serial}_{direction}.csv"
     with open(csv_filename, 'w', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow(['steps_rate', 'duration', 'delta_mass', 'actual_rate'])
+        writer.writerow(['steps_rate', 'duration', 'delta_mass', 'ml_rate'])
 
         projected_ml = 0.0
-        for steps_rate in rates:
+        for steps_rate in steps_rates:
             projected_ml += steps_rate * DURATION * ML_PER_STEP_ESTIMATE
             if projected_ml > FLASK_CAPACITY:
                 input(f"Projected {projected_ml:.1f} ml exceeds flask capacity ({FLASK_CAPACITY} ml). Empty & press Enter to continue.")
@@ -87,7 +90,7 @@ def calibrate_single_pump(pump_serial, direction):
             mass0, t0 = read_stable_weight(scale_ser)
 
             # Start pump and maintain velocity
-            vel = steps_rate if direction == 'forward' else -steps_rate
+            vel = steps_rate / STEPS_PER_PULSE if direction == 'forward' else -steps_rate / STEPS_PER_PULSE
             t_start = time.monotonic()
             while time.monotonic() - t_start < DURATION:
                 pump.set_target_velocity(vel)
@@ -98,25 +101,25 @@ def calibrate_single_pump(pump_serial, direction):
 
             # Compute actual flow
             delta_mass = mass1 - mass0
-            actual_rate = delta_mass / DURATION
+            ml_rate = delta_mass / DURATION / DENSITY_OF_WATER
 
-            writer.writerow([steps_rate, DURATION, delta_mass, actual_rate])
-            print(f"Rate {steps_rate} steps/s -> actual {actual_rate:.4f} ml/s")
+            writer.writerow([steps_rate, DURATION, delta_mass, ml_rate])
+            print(f"Rate {steps_rate} steps/s -> actual {ml_rate:.4f} ml/s")
 
     # Cleanup
     pump.deenergize()
     pump.enter_safe_start()
     scale_ser.close()
 
+pump_serials = ['00473498']
+
 def main():
-    pumps = Config.PUMPS
-    for pump_name, pump_info in pumps.items():
-        pump_serial = pump_info['serial']
+    for pump_serial in pump_serials:
         for direction in ['forward', 'reverse']:
-            print(f"\n=== Calibration for pump {pump_name} (serial: {pump_serial}), direction: {direction} ===")
+            print(f"\n=== Calibration for pump serial: {pump_serial}, direction: {direction} ===")
             input("Please empty the flask and press Enter to begin this calibration run...")
             calibrate_single_pump(pump_serial, direction)
-            print(f"Calibration for pump {pump_name} (serial: {pump_serial}), direction: {direction} complete.\n")
+            print(f"Calibration for pump serial: {pump_serial}, direction: {direction} complete.\n")
 
 if __name__ == '__main__':
     main()
