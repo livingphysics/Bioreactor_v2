@@ -113,6 +113,7 @@ def calibrate_single_pump(pump_serial, direction):
 pump_serials = ['00473498']
 
 def main():
+    time.sleep(3600*4)
     for pump_serial in pump_serials:
         for direction in ['forward', 'reverse']:
             print(f"\n=== Calibration for pump serial: {pump_serial}, direction: {direction} ===")
