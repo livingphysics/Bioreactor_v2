@@ -1,14 +1,18 @@
 import pandas as pd
 from sklearn.linear_model import LinearRegression
-
-# Configuration
-INPUT_CSV = "pump_SERIAL3_forward.csv"
-OUTPUT_TXT = "calibration_SERIAL3_forward.txt"
+import matplotlib.pyplot as plt
+import sys
+import os
 
 
 def main():
+    if len(sys.argv) != 2:
+        print(f"Usage: python {os.path.basename(sys.argv[0])} <input_csv>")
+        sys.exit(1)
+    input_csv = sys.argv[1]
+
     # Load experimental data
-    df = pd.read_csv(INPUT_CSV)
+    df = pd.read_csv(input_csv)
     X = df[['step_rate']].values
     y = df['actual_rate'].values
 
@@ -18,12 +22,19 @@ def main():
     gradient = model.coef_[0]
     intercept = model.intercept_
 
-    # Save calibration
-    with open(OUTPUT_TXT, 'w') as f:
-        f.write(f"gradient: {gradient}\n")
-        f.write(f"intercept: {intercept}\n")
-
-    print(f"Calibration results saved to {OUTPUT_TXT}")
+    # Plot data and regression line
+    plt.scatter(X, y, color='blue', label='Data')
+    x_line = pd.Series(X.flatten()).sort_values()
+    y_line = gradient * x_line + intercept
+    plt.plot(x_line, y_line, color='red', label='Regression line')
+    plt.xlabel('Step Rate')
+    plt.ylabel('Actual Rate')
+    plt.title('Linear Regression Calibration')
+    eqn = f"y = {gradient:.4f}x + {intercept:.4f}"
+    plt.legend()
+    plt.text(0.05, 0.95, eqn, transform=plt.gca().transAxes, fontsize=12, verticalalignment='top', bbox=dict(facecolor='white', alpha=0.7))
+    plt.tight_layout()
+    plt.show()
 
 if __name__ == '__main__':
     main()
