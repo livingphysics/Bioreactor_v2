@@ -60,7 +60,7 @@ def read_stable_weight():
             del ser
             return w
         prev = w
-        time.sleep(0.1)
+        time.sleep(3.0)
 
 def calibrate_single_pump(pump_serial, direction):
     steps_rates = np.linspace(STEPS_MIN, STEPS_MAX, NUM_POINTS)
