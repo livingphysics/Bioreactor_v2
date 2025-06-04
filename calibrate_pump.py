@@ -110,7 +110,7 @@ def calibrate_single_pump(pump_serial, direction):
             writer.writerow([real_steps_rate, real_duration, delta_mass, ml_rate])
             print(f"Rate {real_steps_rate} steps/s -> actual {ml_rate:.4f} ml/s")
 
-pump_serials = ['00473498']
+pump_serials = ['00473498', '00473504', '00473510', '00473552', '00473517', '00473508', '00473497', '00473491']
 
 def main():
     time.sleep(3600*4)
