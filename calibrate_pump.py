@@ -104,7 +104,7 @@ def calibrate_single_pump(pump_serial, direction):
 
             # Compute actual flow
             delta_mass = mass1 - mass0
-            ml_rate = delta_mass / real_duration / DENSITY_OF_WATER
+            ml_rate = abs(delta_mass) / real_duration / DENSITY_OF_WATER
 
             writer.writerow([real_steps_rate, real_duration, delta_mass, ml_rate])
             print(f"Rate {real_steps_rate} steps/s -> actual {ml_rate:.4f} ml/s")
