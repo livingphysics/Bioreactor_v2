@@ -34,7 +34,7 @@ def parse_weight(s: str) -> float:
 def read_stable_weight():
     """
     Polls for weight until two consecutive readings agree within TOLERANCE.
-    Returns (weight_g, timestamp).
+    Returns weight_g.
     """
     # Open serial for scale
     ser = serial.Serial(port=SERIAL_PORT_SCALE,
@@ -43,31 +43,24 @@ def read_stable_weight():
                               parity=serial.PARITY_NONE,
                               stopbits=serial.STOPBITS_ONE,
                               timeout=READ_TIMEOUT)
-    # prev = None
-    counter = 0
+    
+    prev = None
     while True:
-        if counter>10:
-            break
         ser.write(b'w')
         raw = ser.read(18)
-        print(raw,'\n')
-        # try:
-        
-            # text = raw.decode('ascii', errors='ignore')
-        # except:
-            # continue
-        # w = parse_weight(text)
-        # if w is None:
-            # continue
-        # now = time.time()
-        # if prev is not None and abs(w - prev) < TOLERANCE:
-            # return w, now
-        # prev = w
-        # time.sleep(0.1)
-        counter+=1
-    ser.close()
-    del ser
-    return 0, 0
+        try:
+            text = raw.decode('ascii', errors='ignore')
+        except:
+            continue
+        w = parse_weight(text)
+        if w is None:
+            continue
+        if prev is not None and abs(w - prev) < TOLERANCE:
+            ser.close()
+            del ser
+            return w
+        prev = w
+        time.sleep(0.1)
 
 def calibrate_single_pump(pump_serial, direction):
     steps_rates = np.logspace(np.log10(STEPS_MIN), np.log10(STEPS_MAX), NUM_POINTS)
@@ -82,8 +75,7 @@ def calibrate_single_pump(pump_serial, direction):
         for steps_rate in steps_rates:
 
             # Tare and initial weight
-            # scale_ser.write(b't')
-            mass0, t0 = read_stable_weight()
+            mass0 = read_stable_weight()
             
             pump = TicUSB(serial_number=pump_serial)  # auto-detect port
             pump.halt_and_set_position(0)
@@ -91,46 +83,31 @@ def calibrate_single_pump(pump_serial, direction):
             pump.exit_safe_start()
             pump.set_step_mode(3)
             pump.set_current_limit(32)
-            print(f"{pump.get_planning_mode()=}")
     
-            
             # Start pump and maintain velocity
             vel = steps_rate / STEPS_PER_PULSE if direction == 'forward' else -steps_rate / STEPS_PER_PULSE
             vel = int(floor(vel))
-            print(f"{vel=}")
-            print(type(vel))
-            true_steps_rate = abs(vel) * STEPS_PER_PULSE
-            t_start = time.time()
+            real_steps_rate = abs(vel) * STEPS_PER_PULSE
             
-            print(f"{pump.get_planning_mode()=}")
-            counter = 0
+            t_start = time.time()
             while time.time() - t_start < DURATION:
                 pump.set_target_velocity(vel)
-                # print(vel)
-                # print(f"{pump.get_max_speed()=}")
-                # print(f"{pump.get_max_acceleration()=}")
-                # print(f"{pump.get_current_velocity()=}")
-                # # print(f"{pump.get_status_flags()}")
-                # counter += 1
-                # if counter >= 10:
-                    # break
             pump.set_target_velocity(0)
+            real_duration = time.time() - t_start
             
             pump.deenergize()
             pump.enter_safe_start()
             del pump
+            
             # Final weight
-            mass1, t1 = read_stable_weight()
+            mass1 = read_stable_weight()
 
             # Compute actual flow
-            # delta_mass = mass1 - mass0
-            # ml_rate = delta_mass / DURATION / DENSITY_OF_WATER
+            delta_mass = mass1 - mass0
+            ml_rate = delta_mass / real_duration / DENSITY_OF_WATER
 
-            # writer.writerow([true_steps_rate, DURATION, delta_mass, ml_rate])
-            # print(f"Rate {true_steps_rate} steps/s -> actual {ml_rate:.4f} ml/s")
-
-    # Cleanup
-
+            writer.writerow([real_steps_rate, real_duration, delta_mass, ml_rate])
+            print(f"Rate {real_steps_rate} steps/s -> actual {ml_rate:.4f} ml/s")
 
 pump_serials = ['00473498']
 
