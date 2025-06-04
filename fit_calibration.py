@@ -13,8 +13,8 @@ def main():
 
     # Load experimental data
     df = pd.read_csv(input_csv)
-    X = df[['step_rate']].values
-    y = df['actual_rate'].values
+    X = df[['steps_rate']].values
+    y = df['ml_rate'].values
 
     # Fit linear model
     model = LinearRegression()

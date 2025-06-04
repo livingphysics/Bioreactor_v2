@@ -8,9 +8,9 @@ from math import floor
 import re
 
 # Configuration
-STEPS_MIN = 500*1000 / 8             # steps/sec minimum
-STEPS_MAX = 1000*1000 / 8           # steps/sec maximum
-NUM_POINTS = 2            # number of test points
+STEPS_MIN = 30 *1000             # steps/sec minimum
+STEPS_MAX = 400 * 1000           # steps/sec maximum
+NUM_POINTS = 11            # number of test points
 DURATION = 20.0            # seconds per test
 
 DENSITY_OF_WATER = 1.0     # g/ml
