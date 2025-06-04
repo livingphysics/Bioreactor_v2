@@ -10,7 +10,7 @@ import re
 # Configuration
 STEPS_MIN = 50 *1000             # steps/sec minimum
 STEPS_MAX = 250 * 1000           # steps/sec maximum
-NUM_POINTS = 21            # number of test points
+NUM_POINTS = 41            # number of test points
 DURATION = 60.0            # seconds per test
 
 DENSITY_OF_WATER = 1.0     # g/ml
