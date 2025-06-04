@@ -8,8 +8,8 @@ from math import floor
 import re
 
 # Configuration
-STEPS_MIN = 30 *1000             # steps/sec minimum
-STEPS_MAX = 400 * 1000           # steps/sec maximum
+STEPS_MIN = 50 *1000             # steps/sec minimum
+STEPS_MAX = 250 * 1000           # steps/sec maximum
 NUM_POINTS = 21            # number of test points
 DURATION = 60.0            # seconds per test
 
@@ -65,6 +65,7 @@ def read_stable_weight():
 def calibrate_single_pump(pump_serial, direction):
     steps_rates = np.linspace(STEPS_MIN, STEPS_MAX, NUM_POINTS)
     steps_rates = np.unique(steps_rates.astype(int))
+    np.random.shuffle(steps_rates)  # Randomize the order
     print(f"{steps_rates=}")
 
 
