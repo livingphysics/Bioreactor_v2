@@ -30,7 +30,7 @@ def main():
     plt.xlabel('Step Rate')
     plt.ylabel('Actual Rate')
     plt.title('Linear Regression Calibration')
-    eqn = f"y = {gradient:.4f}x + {intercept:.4f}"
+    eqn = f"y = {gradient:.8f}x + {intercept:.8f}"
     plt.legend()
     plt.text(0.05, 0.95, eqn, transform=plt.gca().transAxes, fontsize=12, verticalalignment='top', bbox=dict(facecolor='white', alpha=0.7))
     plt.tight_layout()

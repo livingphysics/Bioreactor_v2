@@ -10,8 +10,8 @@ import re
 # Configuration
 STEPS_MIN = 30 *1000             # steps/sec minimum
 STEPS_MAX = 400 * 1000           # steps/sec maximum
-NUM_POINTS = 11            # number of test points
-DURATION = 20.0            # seconds per test
+NUM_POINTS = 21            # number of test points
+DURATION = 60.0            # seconds per test
 
 DENSITY_OF_WATER = 1.0     # g/ml
 FLASK_CAPACITY = 1000.0      # ml
@@ -63,7 +63,7 @@ def read_stable_weight():
         time.sleep(0.1)
 
 def calibrate_single_pump(pump_serial, direction):
-    steps_rates = np.logspace(np.log10(STEPS_MIN), np.log10(STEPS_MAX), NUM_POINTS)
+    steps_rates = np.linspace(STEPS_MIN, STEPS_MAX, NUM_POINTS)
     steps_rates = np.unique(steps_rates.astype(int))
     print(f"{steps_rates=}")
 
