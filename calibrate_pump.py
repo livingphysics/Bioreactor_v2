@@ -115,7 +115,6 @@ def main():
     for pump_serial in pump_serials:
         for direction in ['forward', 'reverse']:
             print(f"\n=== Calibration for pump serial: {pump_serial}, direction: {direction} ===")
-            input("Please empty the flask and press Enter to begin this calibration run...")
             calibrate_single_pump(pump_serial, direction)
             print(f"Calibration for pump serial: {pump_serial}, direction: {direction} complete.\n")
 
