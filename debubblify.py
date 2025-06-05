@@ -3,7 +3,8 @@ from ticlib import TicUSB
 from math import floor
 
 # List of pump serials (edit as needed)
-pump_serials = ['00473498', '00473504', '00473510', '00473552', '00473517', '00473508', '00473497', '00473491']  # Add more serials as needed
+pump_serials = ['00473498', '00473497']
+# , '00473504', '00473510', '00473552', '00473517', '00473508', '00473497', '00473491']  # Add more serials as needed
 
 STEP_MODE = 3  # Step mode (as in calibration)
 STEPS_PER_PULSE = 0.5 ** STEP_MODE  # steps/pulse

@@ -110,10 +110,9 @@ def calibrate_single_pump(pump_serial, direction):
             writer.writerow([real_steps_rate, real_duration, delta_mass, ml_rate])
             print(f"Rate {real_steps_rate} steps/s -> actual {ml_rate:.4f} ml/s")
 
-pump_serials = ['00473498', '00473504', '00473510', '00473552', '00473517', '00473508', '00473497', '00473491']
+pump_serials = ['00473498']
 
 def main():
-    time.sleep(3600*3.5)
     for pump_serial in pump_serials:
         for direction in ['forward', 'reverse']:
             print(f"\n=== Calibration for pump serial: {pump_serial}, direction: {direction} ===")
