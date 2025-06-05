@@ -8,6 +8,12 @@ import pandas as pd
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from tqdm import trange
+import matplotlib.pyplot as plt
+import serial
+import re
+from math import floor
+import time
+from ticlib import TicUSB
 
 
 def load_and_fit(csv_path):
@@ -41,6 +47,108 @@ def wild_bootstrap_at_x(X_thousands, y_ul_s, residuals, model, x_target, n_boot=
     return y_boot
 
 
+# --- Scale reading utilities (from calibrate_pump.py) ---
+SERIAL_PORT_SCALE = "/dev/ttyUSB0"  # Update if needed
+BAUDRATE = 9600
+TOLERANCE = 0.001
+READ_TIMEOUT = 1
+
+
+def parse_weight(s: str) -> float:
+    m = re.search(r'[-+]?\d*\.\d+|\d+', s)
+    return float(m.group()) if m else None
+
+def read_stable_weight():
+    ser = serial.Serial(port=SERIAL_PORT_SCALE,
+                        baudrate=BAUDRATE,
+                        bytesize=serial.EIGHTBITS,
+                        parity=serial.PARITY_NONE,
+                        stopbits=serial.STOPBITS_ONE,
+                        timeout=READ_TIMEOUT)
+    prev = None
+    while True:
+        ser.write(b'w')
+        raw = ser.read(18)
+        try:
+            text = raw.decode('ascii', errors='ignore')
+        except:
+            continue
+        w = parse_weight(text)
+        if w is None:
+            continue
+        if prev is not None and abs(w - prev) < TOLERANCE:
+            ser.close()
+            del ser
+            return w
+        prev = w
+        time.sleep(3.0)
+
+# --- Pump driving utilities (from debubblify.py) ---
+STEP_MODE = 3
+STEPS_PER_PULSE = 0.5 ** STEP_MODE
+
+def init_pump(pump_serial):
+    pump = TicUSB(serial_number=pump_serial)
+    pump.energize()
+    pump.exit_safe_start()
+    pump.set_step_mode(STEP_MODE)
+    pump.set_current_limit(32)
+    return pump
+
+def stop_pump(pump):
+    pump.set_target_velocity(0)
+    pump.deenergize()
+    pump.enter_safe_start()
+    del pump
+
+def run_dual_experiment(in_pump_serial, in_steps_rate, out_pump_serial, out_steps_rate, grad_ci, duration=3600, measurement_interval=15):
+    print(f"\nRunning dual experiment for {duration//60} minutes...")
+    # Setup both pumps
+    in_velocity = int(floor(in_steps_rate / STEPS_PER_PULSE))
+    out_velocity = int(floor(out_steps_rate / STEPS_PER_PULSE))
+
+    # Data storage
+    times = [0.0]
+    masses = [0.0,]
+    initial_mass = read_stable_weight()
+    t_exp = 0.0
+    measurement_number = 0
+    while t_exp < duration:
+        in_pump = init_pump(in_pump_serial)
+        out_pump = init_pump(out_pump_serial)
+
+        # Start both pumps
+        t_measurement_start = time.time()
+        while time.time() - t_measurement_start <= measurement_interval:
+            in_pump.set_target_velocity(in_velocity)
+            out_pump.set_target_velocity(out_velocity)
+        t_exp += time.time() - t_measurement_start
+        
+        # Stop both pumps
+        stop_pump(in_pump)
+        stop_pump(out_pump)
+        
+        # Pause for measurement
+        mass = read_stable_weight()
+        times.append(t_exp)
+        masses.append(mass - initial_mass)
+        print(f"  t={t_exp:.1f}s, delta_mass={mass - initial_mass:.4f}g")
+
+    # Plot
+    plt.figure(figsize=(10,6))
+    plt.plot(times, masses, '+-', label=f'Δmass')
+    # Overlay CI lines: y = grad*x for grad in grad_ci
+    x_grid = np.linspace(0, max(times), 100)
+    for grad, color, label in zip(grad_ci, ['red','blue'], ['CI lower','CI upper']):
+        plt.plot(x_grid, grad * x_grid / 1e6, '--', color=color, label=label)
+    plt.xlabel('Experiment time (s)')
+    plt.ylabel('Δmass (g)')
+    plt.title(f'Dual Pump Δmass vs. time at {in_steps_rate:.1f} & {out_steps_rate:.1f} steps/sec')
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
+
 def main():
     # Find CSVs
     calib_dir = 'calibration_data'
@@ -72,6 +180,9 @@ def main():
     print(f"  out_pump: {out_pump}")
     print(f"  Mean difference: {mean_diff:.3f} uL/s")
     print(f"  95% CI: [{ci_low:.3f}, {ci_high:.3f}] uL/s")
+
+    # --- Run dual experiment for both pumps ---
+    run_dual_experiment(in_pump, x_in_target, out_pump, x_out_target, [ci_low, ci_high], duration=3600, measurement_interval=15)
 
 if __name__ == "__main__":
     main()
