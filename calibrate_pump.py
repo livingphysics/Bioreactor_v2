@@ -62,17 +62,18 @@ def read_stable_weight():
         prev = w
         time.sleep(3.0)
 
-def calibrate_single_pump(pump_serial, direction):
+def calibrate_single_pump(pump_serial, direction, repeats=3):
     steps_rates = np.linspace(STEPS_MIN, STEPS_MAX, NUM_POINTS)
     steps_rates = np.unique(steps_rates.astype(int))
-    np.random.shuffle(steps_rates)  # Randomize the order
-    print(f"{steps_rates=}")
 
 
     csv_filename = f"pump_{pump_serial}_{direction}.csv"
     with open(csv_filename, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(['steps_rate', 'duration', 'delta_mass', 'ml_rate'])
+        for _ in range(repeats):
+        np.random.shuffle(steps_rates)  # Randomize the order
+        print(f"{steps_rates=}")
         for steps_rate in steps_rates:
 
             # Tare and initial weight
@@ -114,9 +115,9 @@ pump_serials = ['00473498']
 
 def main():
     for pump_serial in pump_serials:
-        for direction in ['forward', 'reverse']:
+        for direction in ['forward',]:
             print(f"\n=== Calibration for pump serial: {pump_serial}, direction: {direction} ===")
-            calibrate_single_pump(pump_serial, direction)
+            calibrate_single_pump(pump_serial, direction,repeats=3)
             print(f"Calibration for pump serial: {pump_serial}, direction: {direction} complete.\n")
 
 if __name__ == '__main__':
