@@ -182,7 +182,7 @@ def main():
     print(f"  95% CI: [{ci_low:.3f}, {ci_high:.3f}] uL/s")
 
     # --- Run dual experiment for both pumps ---
-    run_dual_experiment(in_pump, x_in_target, out_pump, x_out_target, [ci_low, ci_high], duration=3600, measurement_interval=15)
+    run_dual_experiment(in_pump, x_in_target*1000, out_pump, x_out_target*1000, [ci_low, ci_high], duration=3600, measurement_interval=15)
 
 if __name__ == "__main__":
     main()
