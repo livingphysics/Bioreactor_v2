@@ -101,7 +101,7 @@ def stop_pump(pump):
     pump.enter_safe_start()
     del pump
 
-def run_dual_experiment(in_pump_serial, in_steps_rate, out_pump_serial, out_steps_rate, grad_ci, duration=3600, measurement_interval=15):
+def run_dual_experiment(in_pump_serial, in_steps_rate, out_pump_serial, out_steps_rate, duration=3600, measurement_interval=15, csv_output_path="dual_experiment_results.csv"):
     print(f"\nRunning dual experiment for {duration//60} minutes...")
     # Setup both pumps
     in_velocity = int(floor(in_steps_rate / STEPS_PER_PULSE))
@@ -110,6 +110,7 @@ def run_dual_experiment(in_pump_serial, in_steps_rate, out_pump_serial, out_step
     # Data storage
     times = [0.0]
     masses = [0.0,]
+    data_rows = [(0.0, 0.0)]  # For CSV: (time, delta_mass)
     initial_mass = read_stable_weight()
     t_exp = 0.0
     measurement_number = 0
@@ -131,22 +132,17 @@ def run_dual_experiment(in_pump_serial, in_steps_rate, out_pump_serial, out_step
         # Pause for measurement
         mass = read_stable_weight()
         times.append(t_exp)
-        masses.append(mass - initial_mass)
-        print(f"  t={t_exp:.1f}s, delta_mass={mass - initial_mass:.4f}g")
-
-    # Plot
-    plt.figure(figsize=(10,6))
-    plt.plot(times, masses, '+-', label=f'Δmass')
-    # Overlay CI lines: y = grad*x for grad in grad_ci
-    x_grid = np.linspace(0, max(times), 100)
-    for grad, color, label in zip(grad_ci, ['red','blue'], ['CI lower','CI upper']):
-        plt.plot(x_grid, grad * x_grid / 1e6, '--', color=color, label=label)
-    plt.xlabel('Experiment time (s)')
-    plt.ylabel('Δmass (g)')
-    plt.title(f'Dual Pump Δmass vs. time at {in_steps_rate:.1f} & {out_steps_rate:.1f} steps/sec')
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
+        delta_mass = mass - initial_mass
+        masses.append(delta_mass)
+        data_rows.append((t_exp, delta_mass))
+        print(f"  t={t_exp:.1f}s, delta_mass={delta_mass:.4f}g")
+    
+    # Write to CSV
+    df = pd.DataFrame(data_rows, columns=["time_s", "delta_mass_g"])
+    df.to_csv(csv_output_path, index=False)
+    print(f"Experiment data saved to {csv_output_path}")
+    
+    return times, masses
 
 
 def main():
@@ -182,7 +178,22 @@ def main():
     print(f"  95% CI: [{ci_low:.3f}, {ci_high:.3f}] uL/s")
 
     # --- Run dual experiment for both pumps ---
-    run_dual_experiment(in_pump, x_in_target*1000, out_pump, x_out_target*1000, [ci_low, ci_high], duration=3600, measurement_interval=15)
+    times, masses =run_dual_experiment(in_pump, x_in_target*1000, out_pump, x_out_target*1000, duration=3600, measurement_interval=15)
+    
+	# Plot
+    plt.figure(figsize=(10,6))
+    plt.plot(times, masses, '+-', label=f'Δmass')
+    # Overlay CI lines: y = grad*x and y = grad*sqrt(x/60) for grad_in and grad_out
+    x_grid = np.linspace(0, max(times), 100)
+    for grad, color in zip([grad_in, grad_out], ['red', 'blue']):
+        plt.plot(x_grid, grad * x_grid / 1e6, '--', color=color, label=f'y={grad:.3f}·x (uL/s)')
+        plt.plot(x_grid, grad * np.sqrt(x_grid/60) / 1e6, ':', color=color, label=f'y={grad:.3f}·sqrt(x/60) (uL/s)')
+    plt.xlabel('Experiment time (s)')
+    plt.ylabel('Δmass (g)')
+    plt.title(f'Dual Pump Δmass vs. time at {x_in_target:.1f} & {x_out_target:.1f} steps/sec')
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
 
 if __name__ == "__main__":
     main()
