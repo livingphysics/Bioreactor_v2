@@ -83,7 +83,7 @@ def analyze_and_plot(ax, input_csv, title=None):
 
 
 def main():
-    calib_dir = 'calibration_data'
+    calib_dir = 'weekend_calibration'
     files = sorted(glob.glob(os.path.join(calib_dir, '*.csv')))
     n_files = len(files)
     if n_files == 0:

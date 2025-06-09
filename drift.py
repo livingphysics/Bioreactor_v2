@@ -147,8 +147,8 @@ def run_dual_experiment(in_pump_serial, in_steps_rate, out_pump_serial, out_step
 
 def main():
     # Find CSVs
-    calib_dir = 'calibration_data'
-    csv_in = os.path.join(calib_dir, f"20250605_1602_pump_00473498_forward.csv")
+    calib_dir = 'weekend_calibration'
+    csv_in = os.path.join(calib_dir, f"pump_{in_pump}_forward.csv")
     csv_out = os.path.join(calib_dir, f"pump_{out_pump}_forward.csv")
     if not os.path.exists(csv_in) or not os.path.exists(csv_out):
         print(f"Could not find calibration CSVs: {csv_in}, {csv_out}")
