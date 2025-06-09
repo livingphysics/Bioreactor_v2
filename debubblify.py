@@ -3,8 +3,9 @@ from ticlib import TicUSB
 from math import floor
 
 # List of pump serials (edit as needed)
-pump_serials = ['00473498', '00473497']
-# , '00473504', '00473510', '00473552', '00473517', '00473508', '00473497', '00473491']  # Add more serials as needed
+pump_serials = [ '00473498', '00473504', '00473510', '00473491','00473497', '00473508', '00473517', '00473552']
+
+# ,'00473497', '00473508', '00473517', '00473552', '00473498', '00473504', '00473510', '00473491', '00473504', '00473510', '00473552', '00473517', '00473508', '00473497', '00473491']  # Add more serials as needed
 
 STEP_MODE = 3  # Step mode (as in calibration)
 STEPS_PER_PULSE = 0.5 ** STEP_MODE  # steps/pulse
@@ -37,7 +38,7 @@ try:
     while True:
         for pump in pumps:
             try:
-                pump.set_target_velocity(velocity)
+                pump.set_target_velocity(-velocity)
             except Exception as e:
                 print(f"Error setting velocity for pump: {e}")
         time.sleep(0.05)  # 50ms loop

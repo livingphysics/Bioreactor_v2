@@ -72,46 +72,46 @@ def calibrate_single_pump(pump_serial, direction, repeats=3):
         writer = csv.writer(f)
         writer.writerow(['steps_rate', 'duration', 'delta_mass', 'ml_rate'])
         for _ in range(repeats):
-        np.random.shuffle(steps_rates)  # Randomize the order
-        print(f"{steps_rates=}")
-        for steps_rate in steps_rates:
+            np.random.shuffle(steps_rates)  # Randomize the order
+            print(f"{steps_rates=}")
+            for steps_rate in steps_rates:
 
-            # Tare and initial weight
-            mass0 = read_stable_weight()
-            
-            pump = TicUSB(serial_number=pump_serial)  # auto-detect port
-            pump.halt_and_set_position(0)
-            pump.energize()
-            pump.exit_safe_start()
-            pump.set_step_mode(3)
-            pump.set_current_limit(32)
-    
-            # Start pump and maintain velocity
-            vel = steps_rate / STEPS_PER_PULSE if direction == 'forward' else -steps_rate / STEPS_PER_PULSE
-            vel = int(floor(vel))
-            real_steps_rate = abs(vel) * STEPS_PER_PULSE
-            
-            t_start = time.time()
-            while time.time() - t_start < DURATION:
-                pump.set_target_velocity(vel)
-            pump.set_target_velocity(0)
-            real_duration = time.time() - t_start
-            
-            pump.deenergize()
-            pump.enter_safe_start()
-            del pump
-            
-            # Final weight
-            mass1 = read_stable_weight()
+                # Initial weight
+                mass0 = read_stable_weight()
+                
+                pump = TicUSB(serial_number=pump_serial)  # auto-detect port
+                pump.halt_and_set_position(0)
+                pump.energize()
+                pump.exit_safe_start()
+                pump.set_step_mode(3)
+                pump.set_current_limit(32)
+        
+                # Start pump and maintain velocity
+                vel = steps_rate / STEPS_PER_PULSE if direction == 'forward' else -steps_rate / STEPS_PER_PULSE
+                vel = int(floor(vel))
+                real_steps_rate = abs(vel) * STEPS_PER_PULSE
+                
+                t_start = time.time()
+                while time.time() - t_start < DURATION:
+                    pump.set_target_velocity(vel)
+                pump.set_target_velocity(0)
+                real_duration = time.time() - t_start
+                
+                pump.deenergize()
+                pump.enter_safe_start()
+                del pump
+                
+                # Final weight
+                mass1 = read_stable_weight()
 
-            # Compute actual flow
-            delta_mass = mass1 - mass0
-            ml_rate = abs(delta_mass) / real_duration / DENSITY_OF_WATER
+                # Compute actual flow
+                delta_mass = mass1 - mass0
+                ml_rate = abs(delta_mass) / real_duration / DENSITY_OF_WATER
 
-            writer.writerow([real_steps_rate, real_duration, delta_mass, ml_rate])
-            print(f"Rate {real_steps_rate} steps/s -> actual {ml_rate:.4f} ml/s")
+                writer.writerow([real_steps_rate, real_duration, delta_mass, ml_rate])
+                print(f"Rate {real_steps_rate} steps/s -> actual {ml_rate:.4f} ml/s")
 
-pump_serials = ['00473498']
+pump_serials = ['00473498', '00473497', '00473504', '00473508', '00473510', '00473517', '00473491', '00473552']
 
 def main():
     for pump_serial in pump_serials:
