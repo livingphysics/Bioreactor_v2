@@ -1,6 +1,6 @@
 # Set your pump serials and flow rate here
-in_pump = '00473498'   # Example: '00473517'
-out_pump = '00473497' # Example: '00473508'
+in_pump = '00473504'   # Example: '00473517'
+out_pump = '00473508' # Example: '00473508'
 flow_rate_ul_s = 20.0    # Example: 15 (microlitres/sec)
 
 import os
