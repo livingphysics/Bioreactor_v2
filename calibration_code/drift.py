@@ -8,7 +8,7 @@ Example:
 This will run the dual pump experiment for vial A at 10.0 uL/s.
 """
 import sys
-from config import Config as cfg
+from src.config import Config as cfg
 import os
 import pandas as pd
 import numpy as np

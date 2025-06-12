@@ -17,7 +17,7 @@ from ticlib import TicUSB
 from math import floor
 import re
 import sys
-from config import Config as cfg
+from src.config import Config as cfg
 from datetime import datetime
 
 # Configuration
