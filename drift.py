@@ -9,11 +9,11 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 from tqdm import trange
 import matplotlib.pyplot as plt
-import serial
+# import serial
 import re
 from math import floor
 import time
-from ticlib import TicUSB
+# from ticlib import TicUSB
 
 
 def load_and_fit(csv_path):
@@ -139,7 +139,11 @@ def run_dual_experiment(in_pump_serial, in_steps_rate, out_pump_serial, out_step
     
     # Write to CSV
     df = pd.DataFrame(data_rows, columns=["time_s", "delta_mass_g"])
-    df.to_csv(csv_output_path, index=False)
+    with open(csv_output_path, 'w') as f:
+        f.write(f"# flow_rate_ul_s: {flow_rate_ul_s}\n")
+        f.write(f"# x_in_target: {x_in_target}\n")
+        f.write(f"# x_out_target: {x_out_target}\n")
+        df.to_csv(f, index=False)
     print(f"Experiment data saved to {csv_output_path}")
     
     return times, masses
@@ -162,6 +166,7 @@ def main():
     # y = grad * x + int => x = (y - int) / grad
     x_in_target = (flow_rate_ul_s - int_in) / grad_in
     x_out_target = (flow_rate_ul_s - int_out) / grad_out
+    print(f"x_in_target: {x_in_target}, x_out_target: {x_out_target}")
 
     # Wild bootstrap distributions at x_target
     y_in_boot = wild_bootstrap_at_x(X_in, y_in, res_in, model_in, x_in_target)
