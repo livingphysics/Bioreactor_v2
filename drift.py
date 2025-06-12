@@ -101,7 +101,13 @@ def stop_pump(pump):
     pump.enter_safe_start()
     del pump
 
-def run_dual_experiment(in_pump_serial, in_steps_rate, out_pump_serial, out_steps_rate, duration=3600, measurement_interval=15, csv_output_path="dual_experiment_results.csv"):
+def run_dual_experiment(in_pump_serial, in_steps_rate, out_pump_serial, out_steps_rate, duration=3600, measurement_interval=15, csv_output_path=None):
+    if csv_output_path is None:
+        from datetime import datetime
+        date_str = datetime.now().strftime('%y%m%d')
+        in_last2 = str(in_pump_serial)[-2:]
+        out_last2 = str(out_pump_serial)[-2:]
+        csv_output_path = f"{date_str}_{in_last2}_{out_last2}_dual_experiment_results.csv"
     print(f"\nRunning dual experiment for {duration//60} minutes...")
     # Setup both pumps
     in_velocity = int(floor(in_steps_rate / STEPS_PER_PULSE))
@@ -183,7 +189,7 @@ def main():
     print(f"  95% CI: [{ci_low:.3f}, {ci_high:.3f}] uL/s")
 
     # --- Run dual experiment for both pumps ---
-    times, masses =run_dual_experiment(in_pump, x_in_target*1000, out_pump, x_out_target*1000, duration=3600, measurement_interval=15)
+    times, masses = run_dual_experiment(in_pump, x_in_target*1000, out_pump, x_out_target*1000, duration=3600, measurement_interval=15)
     
 	# Plot
     plt.figure(figsize=(10,6))
