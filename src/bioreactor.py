@@ -19,7 +19,6 @@ import u3
 
 from .config import Config as cfg
 from ds18b20 import DS18B20
-from PWM_Motor import PWM_Motor, initialize_gpio, cleanup_gpio
 
 logging.basicConfig(
     level=getattr(logging, cfg.LOG_LEVEL),
@@ -400,12 +399,6 @@ class Bioreactor():
                 IO.cleanup()
             except Exception:
                 self.logger.error("Error cleaning up GPIO.")
-
-        # Always call cleanup_gpio if available
-        try:
-            cleanup_gpio()
-        except Exception:
-            self.logger.error("Error calling cleanup_gpio().")
 
         self.logger.info("Bioreactor cleanup complete.")
 

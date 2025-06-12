@@ -2,8 +2,8 @@ from typing import Union
 
 class Config:
     # GPIO pins
-    PELTIER_PWM_PIN = 24
-    PELTIER_DIR_PIN = 25
+    PELTIER_PWM_PIN = 12
+    PELTIER_DIR_PIN = 16
     PELTIER_PWM_FREQ = 1000
 
     # BCM Pin Mapping
@@ -19,25 +19,24 @@ class Config:
     # Stirrer Configuration
     STIRRER_PIN: int = 35
     STIRRER_SPEED: int = 1000
-    DUTY_CYCLE: int = 15
+    DUTY_CYCLE: int = 35
 
     # Ring Light Configuration
     RING_LIGHT_COUNT: int = 32
     RING_LIGHT_BRIGHTNESS: float = 0.2
 
     # ADC Configuration
-    # TODO: Have 8 different lists: ADC_1_REF, ADC_1_135, ADC_1_180, ADC_1_IO_TEMP, ADC_2_REF, ADC_2_135, ADC_2_180, ADC_2_IO_TEMP
     ADC_1_ADDRESS: int = 0x48
-    ADC_1_REF_VOLTAGE: float = 4.2
-    ADC_1_PHOTODIODE_CHANNELS: list[int] = [0, 1, 2, 3, 4, 5, 6, 7]
-    ADC_1_IO_TEMP_CHANNELS: list[int] = []
     ADC_2_ADDRESS: int = 0x49
-    ADC_2_REF_VOLTAGE: float = 4.2
-    ADC_2_PHOTODIODE_CHANNELS: list[int] = [0, 1, 2, 3]
+    ADC_2_REF_VOLTAGE: float = 4.7
+    ADC_1_REF_VOLTAGE: float = 4.7
+    ADC_1_135_CHANNELS: list[int] = [0,1,2,3]
+    ADC_1_180_CHANNELS: list[int] = [4,5,6,7]
+    ADC_2_REF_CHANNELS: list[int] = [0,1,2,3]
     ADC_2_IO_TEMP_CHANNELS: list[int] = [4, 5]
 
     # Temperature Sensor Arrays
-    VIAL_TEMP_SENSOR_ORDER: list[int] = [2, 0, 3, 1]
+    VIAL_TEMP_SENSOR_ORDER: list[int] = [0, 3, 2, 1]
 
     # Logging Configuration
     LOG_LEVEL: str = 'INFO'
@@ -92,7 +91,7 @@ class Config:
         'leds': True,
         'pumps': True,
         'ring_light': True,
-        'optical_density': True,
+        'optical_density': True, # includes io_temp_1 and io_temp_2
         'temp': True,
         'peltier': True,
         'stirrer': True
