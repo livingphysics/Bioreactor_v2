@@ -83,7 +83,8 @@ def calibrate_single_pump(pump_serial, direction, repeats=3, pump_key=None):
     date_str = datetime.now().strftime('%Y%m%d')
     if pump_key is None:
         pump_key = pump_serial
-    csv_filename = f"{date_str}_calibration_{pump_key}_{direction}_results.csv"
+    # Save CSV in calibration_results directory
+    csv_filename = f"calibration_results/{date_str}_calibration_{pump_key}_{direction}_results.csv"
     with open(csv_filename, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(['steps_rate', 'duration', 'delta_mass', 'ml_rate'])

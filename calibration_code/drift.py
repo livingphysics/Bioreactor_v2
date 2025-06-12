@@ -112,7 +112,7 @@ def run_dual_experiment(in_pump_serial, in_steps_rate, out_pump_serial, out_step
         from datetime import datetime
         date_str = datetime.now().strftime('%y%m%d')
         flow_str = f"{flow_rate_ul_s:.1f}".replace('.', '_')
-        csv_output_path = f"{date_str}_drift_{letter}_{flow_str}_results.csv"
+        csv_output_path = f"drift_results/{date_str}_drift_{letter}_{flow_str}_results.csv"
     print(f"\nRunning dual experiment for {duration//60} minutes...")
     # Setup both pumps
     in_velocity = int(floor(in_steps_rate / STEPS_PER_PULSE))
