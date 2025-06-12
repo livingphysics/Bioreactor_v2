@@ -1,9 +1,14 @@
-# Set your pump serials and flow rate here
-in_pump = '00473504'   # Example: '00473491'
-in_pump = '00473504'   # Example: '00473491'
-out_pump = '00473508' # Example: '00473552'
-flow_rate_ul_s = 20.0    # Example: 15 (microlitres/sec)
+"""
+Example usage:
+    python drift.py <letter: A/B/C/D> <flow_rate_ul_s>
 
+Example:
+    python drift.py A 10.0
+
+This will run the dual pump experiment for vial A at 10.0 uL/s.
+"""
+import sys
+from config import Config as cfg
 import os
 import pandas as pd
 import numpy as np
@@ -102,13 +107,12 @@ def stop_pump(pump):
     pump.enter_safe_start()
     del pump
 
-def run_dual_experiment(in_pump_serial, in_steps_rate, out_pump_serial, out_steps_rate, duration=3600, measurement_interval=15, csv_output_path=None):
+def run_dual_experiment(in_pump_serial, in_steps_rate, out_pump_serial, out_steps_rate, duration=3600, measurement_interval=15, csv_output_path=None, flow_rate_ul_s=None):
     if csv_output_path is None:
         from datetime import datetime
         date_str = datetime.now().strftime('%y%m%d')
-        in_last2 = str(in_pump_serial)[-2:]
-        out_last2 = str(out_pump_serial)[-2:]
-        csv_output_path = f"{date_str}_{in_last2}_{out_last2}_dual_experiment_results.csv"
+        flow_str = f"{flow_rate_ul_s:.1f}".replace('.', '_')
+        csv_output_path = f"{date_str}_drift_{letter}_{flow_str}_results.csv"
     print(f"\nRunning dual experiment for {duration//60} minutes...")
     # Setup both pumps
     in_velocity = int(floor(in_steps_rate / STEPS_PER_PULSE))
@@ -146,17 +150,38 @@ def run_dual_experiment(in_pump_serial, in_steps_rate, out_pump_serial, out_step
     
     # Write to CSV
     df = pd.DataFrame(data_rows, columns=["time_s", "delta_mass_g"])
-    with open(csv_output_path, 'w') as f:
-        f.write(f"# flow_rate_ul_s: {flow_rate_ul_s}\n")
-        f.write(f"# x_in_target: {x_in_target}\n")
-        f.write(f"# x_out_target: {x_out_target}\n")
-        df.to_csv(f, index=False)
+    df.to_csv(csv_output_path, index=False)
     print(f"Experiment data saved to {csv_output_path}")
     
     return times, masses
 
 
 def main():
+    if len(sys.argv) != 3:
+        print(f"Usage: python {sys.argv[0]} <letter: A/B/C/D> <flow_rate_ul_s>")
+        sys.exit(1)
+    global letter
+    letter = sys.argv[1].upper()
+    if letter not in ['A', 'B', 'C', 'D']:
+        print("Error: Letter must be one of A, B, C, D.")
+        sys.exit(1)
+    try:
+        flow_rate_ul_s = float(sys.argv[2])
+    except ValueError:
+        print("Error: flow_rate_ul_s must be a number.")
+        sys.exit(1)
+    # Check for at most 1 decimal place
+    flow_str = sys.argv[2]
+    if '.' in flow_str:
+        decimal_part = flow_str.split('.')[-1]
+        if len(decimal_part) > 1:
+            print("Error: Please input flow_rate_ul_s with at most 1 decimal place.")
+            sys.exit(1)
+    in_key = f'{letter}_in'
+    out_key = f'{letter}_out'
+    in_pump = cfg.PUMPS[in_key]['serial']
+    out_pump = cfg.PUMPS[out_key]['serial']
+
     # Find CSVs
     calib_dir = 'weekend_calibration'
     csv_in = os.path.join(calib_dir, f"pump_{in_pump}_forward.csv")
@@ -190,9 +215,9 @@ def main():
     print(f"  95% CI: [{ci_low:.3f}, {ci_high:.3f}] uL/s")
 
     # --- Run dual experiment for both pumps ---
-    times, masses = run_dual_experiment(in_pump, x_in_target*1000, out_pump, x_out_target*1000, duration=3600, measurement_interval=15)
+    times, masses = run_dual_experiment(in_pump, x_in_target*1000, out_pump, x_out_target*1000, duration=3600, measurement_interval=15, flow_rate_ul_s=flow_rate_ul_s)
     
-	# Plot
+    # Plot
     plt.figure(figsize=(10,6))
     plt.plot(times, masses, '+-', label=f'Δmass')
     # Overlay CI lines: y = grad*x and y = grad*sqrt(x/60) for grad_in and grad_out

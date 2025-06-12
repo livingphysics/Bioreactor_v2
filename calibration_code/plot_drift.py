@@ -1,3 +1,9 @@
+"""
+Example usage:
+    python plot_drift.py <csv_file> [x_min] [x_max]
+
+Plots drift data from a CSV file, with optional time range selection.
+"""
 import sys
 import pandas as pd
 import matplotlib.pyplot as plt

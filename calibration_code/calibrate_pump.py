@@ -1,11 +1,24 @@
+"""
+Example usage:
+    python calibrate_pump.py                # Calibrate all pumps forward
+    python calibrate_pump.py --reverse      # Calibrate all pumps in reverse
+    python calibrate_pump.py A              # Calibrate both A_in and A_out forward
+    python calibrate_pump.py B --reverse    # Calibrate both B_in and B_out in reverse
+    python calibrate_pump.py A_in B C_out   # Calibrate A_in, B_in, B_out, and C_out forward (in order)
+    python calibrate_pump.py A_in B --both  # Calibrate A_in, B_in, B_out both directions
+
+If no pump or letter is given, all pumps are calibrated. Default direction is forward.
+"""
 import time
 import csv
 import numpy as np
 import serial
 from ticlib import TicUSB
 from math import floor
-
 import re
+import sys
+from config import Config as cfg
+from datetime import datetime
 
 # Configuration
 STEPS_MIN = 50 *1000             # steps/sec minimum
@@ -62,12 +75,15 @@ def read_stable_weight():
         prev = w
         time.sleep(3.0)
 
-def calibrate_single_pump(pump_serial, direction, repeats=3):
+def calibrate_single_pump(pump_serial, direction, repeats=3, pump_key=None):
     steps_rates = np.linspace(STEPS_MIN, STEPS_MAX, NUM_POINTS)
     steps_rates = np.unique(steps_rates.astype(int))
 
-
-    csv_filename = f"pump_{pump_serial}_{direction}.csv"
+    from datetime import datetime
+    date_str = datetime.now().strftime('%Y%m%d')
+    if pump_key is None:
+        pump_key = pump_serial
+    csv_filename = f"{date_str}_calibration_{pump_key}_{direction}_results.csv"
     with open(csv_filename, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(['steps_rate', 'duration', 'delta_mass', 'ml_rate'])
@@ -111,14 +127,70 @@ def calibrate_single_pump(pump_serial, direction, repeats=3):
                 writer.writerow([real_steps_rate, real_duration, delta_mass, ml_rate])
                 print(f"Rate {real_steps_rate} steps/s -> actual {ml_rate:.4f} ml/s")
 
-pump_serials = ['00473498', '00473497', '00473504', '00473508', '00473510', '00473517', '00473491', '00473552']
+def parse_args():
+    args = sys.argv[1:]
+    directions = []
+    pump_tokens = []
+    direction_flag = 'forward'
+    for arg in args:
+        if arg == '--forward':
+            direction_flag = 'forward'
+        elif arg == '--reverse':
+            direction_flag = 'reverse'
+        elif arg == '--both':
+            direction_flag = 'both'
+        elif arg.startswith('--'):
+            print(f"Unknown flag: {arg}")
+            sys.exit(1)
+        else:
+            pump_tokens.append(arg)
+    return pump_tokens, direction_flag
+
+# Helper to expand user tokens to pump keys
+PUMP_KEYS = list(cfg.PUMPS.keys())
+PUMP_LETTERS = ['A', 'B', 'C', 'D']
+
+def expand_pump_tokens(tokens):
+    # If no tokens, return all pumps
+    if not tokens:
+        return PUMP_KEYS.copy()
+    result = []
+    for token in tokens:
+        t = token.upper()
+        if t in PUMP_LETTERS:
+            # Add both in and out for this letter
+            result.append(f'{t}_in')
+            result.append(f'{t}_out')
+        elif t.endswith('_IN') or t.endswith('_OUT'):
+            # Add specific pump if valid
+            key = t.capitalize() if t[1] == '_' else t[0].upper() + t[1:].lower()
+            if key in cfg.PUMPS:
+                result.append(key)
+            else:
+                print(f"Unknown pump: {token}")
+                sys.exit(1)
+        else:
+            print(f"Unknown argument: {token}")
+            sys.exit(1)
+    return result
 
 def main():
-    for pump_serial in pump_serials:
-        for direction in ['forward',]:
-            print(f"\n=== Calibration for pump serial: {pump_serial}, direction: {direction} ===")
-            calibrate_single_pump(pump_serial, direction,repeats=3)
-            print(f"Calibration for pump serial: {pump_serial}, direction: {direction} complete.\n")
+    pump_tokens, direction_flag = parse_args()
+    pump_keys = expand_pump_tokens(pump_tokens)
+    # Remove duplicates but preserve order
+    seen = set()
+    ordered_pump_keys = []
+    for k in pump_keys:
+        if k not in seen:
+            ordered_pump_keys.append(k)
+            seen.add(k)
+    directions = ['forward'] if direction_flag == 'forward' else ['reverse'] if direction_flag == 'reverse' else ['forward', 'reverse']
+    for direction in directions:
+        for pump_key in ordered_pump_keys:
+            pump_serial = cfg.PUMPS[pump_key]['serial']
+            print(f"\n=== Calibration for {pump_key} (serial: {pump_serial}), direction: {direction} ===")
+            calibrate_single_pump(pump_serial, direction, repeats=3, pump_key=pump_key)
+            print(f"Calibration for {pump_key} (serial: {pump_serial}), direction: {direction} complete.\n")
 
 if __name__ == '__main__':
     main()

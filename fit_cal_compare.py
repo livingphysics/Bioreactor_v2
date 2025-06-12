@@ -1,3 +1,9 @@
+"""
+Example usage:
+    python fit_cal_compare.py
+
+Compares old and new calibration data, fits models, and plots results.
+"""
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt

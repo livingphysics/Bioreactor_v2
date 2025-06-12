@@ -1,3 +1,5 @@
+from typing import Union
+
 class Config:
     # GPIO pins
     PELTIER_PWM_PIN = 24
@@ -43,42 +45,42 @@ class Config:
 
     # Pump Configuration
     PUMPS: dict[str, dict[str, Union[str, float, dict]]] = {
-        'tube_1_in':  {
+        'A_in':  {
             'serial': '00473498',
             'direction': 'forward',  # user-set: 'forward' or 'reverse'
             'forward': {'gradient': 0.002, 'intercept': 0.0},
         },
-        'tube_1_out': {
+        'A_out': {
             'serial': '00473497',
             'direction': 'reverse',
             'forward': {'gradient': 0.002, 'intercept': 0.0},
         },
-        'tube_2_in':  {
+        'B_in':  {
             'serial': '00473504',
             'direction': 'forward',
             'forward': {'gradient': 0.002, 'intercept': 0.0},
         },
-        'tube_2_out': {
+        'B_out': {
             'serial': '00473508',
             'direction': 'reverse',
             'forward': {'gradient': 0.002, 'intercept': 0.0},
         },
-        'tube_3_in':  {
+        'C_in':  {
             'serial': '00473510',
             'direction': 'forward',
             'forward': {'gradient': 0.002, 'intercept': 0.0},
         },
-        'tube_3_out': {
+        'C_out': {
             'serial': '00473517',
             'direction': 'reverse',
             'forward': {'gradient': 0.002, 'intercept': 0.0},
         },
-        'tube_4_in':  {
+        'D_in':  {
             'serial': '00473491',
             'direction': 'forward',
             'forward': {'gradient': 0.002, 'intercept': 0.0},
         },
-        'tube_4_out': {
+        'D_out': {
             'serial': '00473552',
             'direction': 'reverse',
             'forward': {'gradient': 0.002, 'intercept': 0.0},
@@ -99,23 +101,23 @@ class Config:
     LOG_FILE: str = 'bioreactor.log'
 
     SENSOR_LABELS: dict = {
-        'photodiode_1': 'vial_1_180_degree',
-        'photodiode_2': 'vial_1_135_degree',
-        'photodiode_3': 'vial_2_180_degree',
-        'photodiode_4': 'vial_2_135_degree',
-        'photodiode_5': 'vial_3_180_degree',
-        'photodiode_6': 'vial_3_135_degree',
-        'photodiode_7': 'vial_4_180_degree',
-        'photodiode_8': 'vial_4_135_degree',
-        'photodiode_9': 'spare_1',
-        'photodiode_10': 'spare_2',
-        'photodiode_11': 'spare_3',
-        'photodiode_12': 'spare_4',
-        'io_temp_1': 'io_temp_1',
-        'io_temp_2': 'io_temp_2',
-        'vial_temp_1': 'vial_1_temp',
-        'vial_temp_2': 'vial_2_temp',
-        'vial_temp_3': 'vial_3_temp',
-        'vial_temp_4': 'vial_4_temp',
+        'photodiode_1': 'vial_A_180_degree',
+        'photodiode_2': 'vial_A_135_degree',
+        'photodiode_3': 'vial_B_180_degree',
+        'photodiode_4': 'vial_B_135_degree',
+        'photodiode_5': 'vial_C_180_degree',
+        'photodiode_6': 'vial_C_135_degree',
+        'photodiode_7': 'vial_D_180_degree',
+        'photodiode_8': 'vial_D_135_degree',
+        'photodiode_9': 'vial_A_reference',
+        'photodiode_10': 'vial_B_reference',
+        'photodiode_11': 'vial_C_reference',
+        'photodiode_12': 'vial_D_reference',
+        'io_temp_1': 'io_temp_in',
+        'io_temp_2': 'io_temp_out',
+        'vial_temp_1': 'vial_A_temp',
+        'vial_temp_2': 'vial_B_temp',
+        'vial_temp_3': 'vial_C_temp',
+        'vial_temp_4': 'vial_D_temp',
         'peltier_current': 'peltier_current',
     }

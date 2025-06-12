@@ -1,3 +1,9 @@
+"""
+Example usage:
+    python fit_calibration_old.py <input_csv>
+
+Fits a linear model and plots prediction bands for a single calibration CSV file.
+"""
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
