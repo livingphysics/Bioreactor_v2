@@ -1,6 +1,6 @@
 """
 Example usage:
-    python fit_calibration.py
+    python -m calibration_code.fit_calibration
 
 This script will automatically find all CSV calibration files in the 'calibration_data' directory and plot each as a separate subplot in a single matplotlib window.
 If there are more than 8 files, use the Next/Previous buttons to flip between pages of plots.

@@ -1,9 +1,9 @@
 """
 Example usage:
-    python drift.py <letter: A/B/C/D> <flow_rate_ul_s>
+    python -m calibration_code.drift <letter: A/B/C/D> <flow_rate_ul_s>
 
 Example:
-    python drift.py A 10.0
+    python -m calibration_code.drift A 10.0
 
 This will run the dual pump experiment for vial A at 10.0 uL/s.
 """

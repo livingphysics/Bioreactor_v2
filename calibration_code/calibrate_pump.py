@@ -1,11 +1,11 @@
 """
 Example usage:
-    python calibrate_pump.py                # Calibrate all pumps forward
-    python calibrate_pump.py --reverse      # Calibrate all pumps in reverse
-    python calibrate_pump.py A              # Calibrate both A_in and A_out forward
-    python calibrate_pump.py B --reverse    # Calibrate both B_in and B_out in reverse
-    python calibrate_pump.py A_in B C_out   # Calibrate A_in, B_in, B_out, and C_out forward (in order)
-    python calibrate_pump.py A_in B --both  # Calibrate A_in, B_in, B_out both directions
+    python -m calibration_code.calibrate_pump                # Calibrate all pumps forward
+    python -m calibration_code.calibrate_pump --reverse      # Calibrate all pumps in reverse
+    python -m calibration_code.calibrate_pump A              # Calibrate both A_in and A_out forward
+    python -m calibration_code.calibrate_pump B --reverse    # Calibrate both B_in and B_out in reverse
+    python -m calibration_code.calibrate_pump A_in B C_out   # Calibrate A_in, B_in, B_out, and C_out forward (in order)
+    python -m calibration_code.calibrate_pump A_in B --both  # Calibrate A_in, B_in, B_out both directions
 
 If no pump or letter is given, all pumps are calibrated. Default direction is forward.
 """

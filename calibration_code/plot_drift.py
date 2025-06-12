@@ -1,6 +1,6 @@
 """
 Example usage:
-    python plot_drift.py <csv_file> [x_min] [x_max]
+    python -m calibration_code.plot_drift <csv_file> [x_min] [x_max]
 
 Plots drift data from a CSV file, with optional time range selection.
 """
