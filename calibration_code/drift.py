@@ -20,6 +20,7 @@ import re
 from math import floor
 import time
 from ticlib import TicUSB
+from glob import glob
 
 
 def load_and_fit(csv_path):
@@ -107,7 +108,7 @@ def stop_pump(pump):
     pump.enter_safe_start()
     del pump
 
-def run_dual_experiment(in_pump_serial, in_steps_rate, out_pump_serial, out_steps_rate, duration=3600, measurement_interval=15, csv_output_path=None, flow_rate_ul_s=None):
+def run_dual_experiment(in_pump_serial, in_steps_rate, out_pump_serial, out_steps_rate, duration=3600, measurement_interval=15, csv_output_path=None, flow_rate_ul_s=None, letter=None):
     if csv_output_path is None:
         from datetime import datetime
         date_str = datetime.now().strftime('%y%m%d')
@@ -160,7 +161,6 @@ def main():
     if len(sys.argv) != 3:
         print(f"Usage: python {sys.argv[0]} <letter: A/B/C/D> <flow_rate_ul_s>")
         sys.exit(1)
-    global letter
     letter = sys.argv[1].upper()
     if letter not in ['A', 'B', 'C', 'D']:
         print("Error: Letter must be one of A, B, C, D.")
@@ -182,11 +182,22 @@ def main():
     in_pump = cfg.PUMPS[in_key]['serial']
     out_pump = cfg.PUMPS[out_key]['serial']
 
-    # Find CSVs
-    calib_dir = 'weekend_calibration'
-    csv_in = os.path.join(calib_dir, f"pump_{in_pump}_forward.csv")
-    csv_out = os.path.join(calib_dir, f"pump_{out_pump}_forward.csv")
-    if not os.path.exists(csv_in) or not os.path.exists(csv_out):
+    # Find most recent calibration CSVs in calibration_results
+    def find_latest_calib_csv(letter, direction):
+        pattern = f"calibration_results/*_calibration_{letter}_{direction}_forward_results.csv"
+        files = glob(pattern)
+        if not files:
+            return None
+        # Extract date from filename and sort
+        def extract_date(f):
+            m = re.search(r'(\\d{8})_calibration', f)
+            return m.group(1) if m else ''
+        files.sort(key=extract_date, reverse=True)
+        return files[0]
+
+    csv_in = find_latest_calib_csv(letter, 'in')
+    csv_out = find_latest_calib_csv(letter, 'out')
+    if not csv_in or not csv_out:
         print(f"Could not find calibration CSVs: {csv_in}, {csv_out}")
         return
 
@@ -215,7 +226,7 @@ def main():
     print(f"  95% CI: [{ci_low:.3f}, {ci_high:.3f}] uL/s")
 
     # --- Run dual experiment for both pumps ---
-    times, masses = run_dual_experiment(in_pump, x_in_target*1000, out_pump, x_out_target*1000, duration=3600, measurement_interval=15, flow_rate_ul_s=flow_rate_ul_s)
+    times, masses = run_dual_experiment(in_pump, x_in_target*1000, out_pump, x_out_target*1000, duration=3600, measurement_interval=15, flow_rate_ul_s=flow_rate_ul_s, letter=letter)
     
     # Plot
     plt.figure(figsize=(10,6))
