@@ -15,6 +15,8 @@ from tqdm import tqdm
 from scipy.stats import t
 import glob
 from matplotlib.widgets import Button
+import argparse
+from src.config import Config as cfg
 
 
 def analyze_and_plot(ax, input_csv, title=None):
@@ -83,70 +85,55 @@ def analyze_and_plot(ax, input_csv, title=None):
 
 
 def main():
-    calib_dir = 'weekend_calibration'
-    files = sorted(glob.glob(os.path.join(calib_dir, '*.csv')))
+    parser = argparse.ArgumentParser(description='Plot calibration fits for up to 8 CSVs.')
+    parser.add_argument('csvs', nargs='*', help='Calibration CSV files to plot (max 8).')
+    args = parser.parse_args()
+
+    # If user provides CSVs, use those (up to 8)
+    if args.csvs:
+        files = args.csvs[:8]
+        if len(args.csvs) > 8:
+            print('Warning: More than 8 files provided. Only the first 8 will be plotted.')
+        titles = [os.path.basename(f).replace('pump_', 'Pump ').replace('_', ' ').replace('.csv', '').title() for f in files]
+    else:
+        # No files provided: auto-select most recent for each pump
+        pump_keys = list(cfg.PUMPS.keys())
+        calib_dir = 'calibration_results'
+        files = []
+        titles = []
+        for pump in pump_keys:
+            # Find all matching CSVs for this pump (forward direction)
+            pattern = f"{calib_dir}/*calibration_{pump}_forward_results.csv"
+            matches = sorted(glob.glob(pattern))
+            if matches:
+                most_recent = max(matches, key=os.path.getmtime)
+                files.append(most_recent)
+                titles.append(pump.replace('_', ' ').title())
+            if len(files) == 8:
+                break
+        if not files:
+            print(f"No calibration CSVs found in {calib_dir}")
+            sys.exit(1)
+
     n_files = len(files)
-    if n_files == 0:
-        print(f"No CSV files found in {calib_dir}")
-        sys.exit(1)
-
-    plots_per_page = 8
-    n_pages = int(np.ceil(n_files / plots_per_page))
-
-    # Precompute all axes and plot content
-    fig, axes = plt.subplots(2, 4, figsize=(24, 8), squeeze=False)
+    # Choose layout: 1xN, 2x4, or 4x2 depending on n_files
+    if n_files <= 2:
+        nrows, ncols = 1, n_files
+    elif n_files <= 4:
+        nrows, ncols = 2, 2
+    else:
+        nrows, ncols = 2, 4
+    fig, axes = plt.subplots(nrows, ncols, figsize=(6*ncols, 5*nrows), squeeze=False)
     axes = axes.flatten()
-    plot_handles = []
-    titles = []
-    for i, file in tqdm(enumerate(files)):
-        base = os.path.basename(file)
-        title = base.replace('pump_', 'Pump ').replace('_', ' ').replace('.csv', '').title()
-        titles.append(title)
-        analyze_and_plot(axes[i % plots_per_page], file, title=title)
-        if i % plots_per_page == 0:
-            axes[i % plots_per_page].legend()
-        plot_handles.append(axes[i % plots_per_page])
-    # Hide all axes initially
-    for ax in axes:
-        ax.set_visible(False)
-
-    # Button callback logic
-    current_page = [0]  # Use list for mutability in closure
-
-    def show_page(page):
-        for i, ax in enumerate(axes):
-            ax.clear()
-            ax.set_visible(False)
-        start = page * plots_per_page
-        end = min(start + plots_per_page, n_files)
-        for i, file_idx in enumerate(range(start, end)):
-            analyze_and_plot(axes[i], files[file_idx], title=titles[file_idx])
-            if i == 0:
-                axes[i].legend()
-            axes[i].set_visible(True)
-        fig.suptitle(f'Calibration Plots (Page {page+1} of {n_pages})', fontsize=16)
-        plt.draw()
-
-    def next_page(event):
-        if current_page[0] < n_pages - 1:
-            current_page[0] += 1
-            show_page(current_page[0])
-
-    def prev_page(event):
-        if current_page[0] > 0:
-            current_page[0] -= 1
-            show_page(current_page[0])
-
-    # Add buttons
-    axprev = plt.axes([0.4, 0.01, 0.1, 0.05])
-    axnext = plt.axes([0.5, 0.01, 0.1, 0.05])
-    bnext = Button(axnext, 'Next')
-    bprev = Button(axprev, 'Previous')
-    bnext.on_clicked(next_page)
-    bprev.on_clicked(prev_page)
-
-    show_page(0)
-    plt.tight_layout(rect=[0, 0.06, 1, 0.97])
+    for i, (file, title) in enumerate(zip(files, titles)):
+        analyze_and_plot(axes[i], file, title=title)
+        axes[i].legend()
+        axes[i].set_visible(True)
+    # Hide unused axes
+    for j in range(n_files, len(axes)):
+        axes[j].set_visible(False)
+    fig.suptitle('Calibration Plots', fontsize=16)
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     plt.show()
 
 if __name__ == '__main__':

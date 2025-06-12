@@ -1,11 +1,13 @@
-import time
-import numpy as np
 import logging
+import time
 from typing import Dict, List, Optional, Tuple
-from config import Config as cfg
+
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.animation import FuncAnimation
-from utils import pid_controller, measure_and_write_sensor_data, ExtendedKalmanFilter, turbidostat_od_controller
+
+from src.config import Config as cfg
+from src.utils import pid_controller, measure_and_write_sensor_data, ExtendedKalmanFilter, turbidostat_od_controller
 
 # --- Turbidostat orchestration function ---
 def turbidostat_mode(

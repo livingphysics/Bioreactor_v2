@@ -1,6 +1,6 @@
 import csv
-from config import Config as cfg
 import numpy as np
+from .config import Config as cfg
 
 # Standalone utility functions
 

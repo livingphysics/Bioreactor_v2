@@ -1,8 +1,10 @@
-import time
-import matplotlib.pyplot as plt
-from bioreactor import Bioreactor
-from utils import measure_and_write_sensor_data, pid_controller
 import logging
+import time
+
+import matplotlib.pyplot as plt
+
+from src.bioreactor import Bioreactor
+from src.utils import measure_and_write_sensor_data, pid_controller
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
