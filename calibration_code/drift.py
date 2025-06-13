@@ -228,20 +228,20 @@ def main():
     # --- Run dual experiment for both pumps ---
     times, masses = run_dual_experiment(in_pump, x_in_target*1000, out_pump, x_out_target*1000, duration=3600, measurement_interval=15, flow_rate_ul_s=flow_rate_ul_s, letter=letter)
     
-    # Plot
-    plt.figure(figsize=(10,6))
-    plt.plot(times, masses, '+-', label=f'Δmass')
-    # Overlay CI lines: y = grad*x and y = grad*sqrt(x/60) for grad_in and grad_out
-    x_grid = np.linspace(0, max(times), 100)
-    for grad, color in zip([grad_in, grad_out], ['red', 'blue']):
-        plt.plot(x_grid, grad * x_grid / 1e6, '--', color=color, label=f'y={grad:.3f}·x (uL/s)')
-        plt.plot(x_grid, grad * np.sqrt(x_grid/60) / 1e6, ':', color=color, label=f'y={grad:.3f}·sqrt(x/60) (uL/s)')
-    plt.xlabel('Experiment time (s)')
-    plt.ylabel('Δmass (g)')
-    plt.title(f'Dual Pump Δmass vs. time at {x_in_target:.1f} & {x_out_target:.1f} steps/sec')
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
+    # # Plot
+    # plt.figure(figsize=(10,6))
+    # plt.plot(times, masses, '+-', label=f'Δmass')
+    # # Overlay CI lines: y = grad*x and y = grad*sqrt(x/60) for grad_in and grad_out
+    # x_grid = np.linspace(0, max(times), 100)
+    # for grad, color in zip([grad_in, grad_out], ['red', 'blue']):
+        # plt.plot(x_grid, grad * x_grid / 1e6, '--', color=color, label=f'y={grad:.3f}·x (uL/s)')
+        # plt.plot(x_grid, grad * np.sqrt(x_grid/60) / 1e6, ':', color=color, label=f'y={grad:.3f}·sqrt(x/60) (uL/s)')
+    # plt.xlabel('Experiment time (s)')
+    # plt.ylabel('Δmass (g)')
+    # plt.title(f'Dual Pump Δmass vs. time at {x_in_target:.1f} & {x_out_target:.1f} steps/sec')
+    # plt.legend()
+    # plt.tight_layout()
+    # plt.show()
 
 if __name__ == "__main__":
     main()
