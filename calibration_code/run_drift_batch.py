@@ -21,8 +21,8 @@ logging.basicConfig(
     format='%(asctime)s %(levelname)s: %(message)s',
 )
 
-for letter in LETTERS:
-    for flow in FLOW_RATES:
+for flow in FLOW_RATES:
+    for letter in LETTERS:
         attempt = 0
         success = False
         while attempt < MAX_RETRIES and not success:
