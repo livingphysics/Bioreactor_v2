@@ -7,3 +7,4 @@
 2025-06-13 11:26:19,134 INFO: Starting run: Letter=A, Flow=8.0 uL/s, Attempt=1
 2025-06-13 13:02:28,189 INFO: Success: Letter=A, Flow=8.0 uL/s on attempt 1
 2025-06-13 13:02:28,193 INFO: Starting run: Letter=A, Flow=10.0 uL/s, Attempt=1
+2025-06-13 13:06:23,579 INFO: Starting run: Letter=A, Flow=4.0 uL/s, Attempt=1

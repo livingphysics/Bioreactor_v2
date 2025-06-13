@@ -12,7 +12,7 @@ import time
 import sys
 from ticlib import TicUSB
 from math import floor
-from config import Config as cfg
+from src.config import Config as cfg
 
 # --- Argument parsing ---
 def parse_args():

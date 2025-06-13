@@ -51,7 +51,7 @@ class Config:
         },
         'A_out': {
             'serial': '00473497',
-            'direction': 'reverse',
+            'direction': 'forward',
             'forward': {'gradient': 0.002, 'intercept': 0.0},
         },
         'B_in':  {
@@ -61,7 +61,7 @@ class Config:
         },
         'B_out': {
             'serial': '00473508',
-            'direction': 'reverse',
+            'direction': 'forward',
             'forward': {'gradient': 0.002, 'intercept': 0.0},
         },
         'C_in':  {
@@ -71,7 +71,7 @@ class Config:
         },
         'C_out': {
             'serial': '00473517',
-            'direction': 'reverse',
+            'direction': 'forward',
             'forward': {'gradient': 0.002, 'intercept': 0.0},
         },
         'D_in':  {
@@ -81,7 +81,7 @@ class Config:
         },
         'D_out': {
             'serial': '00473552',
-            'direction': 'reverse',
+            'direction': 'forward',
             'forward': {'gradient': 0.002, 'intercept': 0.0},
         },
     }
