@@ -10,9 +10,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from scipy.stats import t
+import matplotlib.colors as mcolors
 
 
-def plot_drift(csv_file, x_min=None, x_max=None):
+def plot_drift(csv_file, x_min=None, x_max=None, ax=None, label=None, show_title=True, color='b'):
     # Read the CSV file
     df = pd.read_csv(csv_file, comment='#')
     # Check if required columns exist
@@ -72,22 +73,31 @@ def plot_drift(csv_file, x_min=None, x_max=None):
     low = y_grid - t_crit * se_pred
     high = y_grid + t_crit * se_pred
 
+    created_ax = False
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(10, 6))
+        created_ax = True
+    # Get a light version of the color for the data
+    base_color = mcolors.to_rgb(color)
+    light_color = tuple(0.6 + 0.4 * c for c in base_color)  # blend with white
     # Plot all data
-    plt.figure(figsize=(10, 6))
-    plt.plot(x, y, marker='+', linestyle='-', color='b', label='Data')
+    ax.plot(x, y, marker='+', linestyle='-', color=light_color, label=label if label else None)
     # Plot fit and bands only over fit range
-    plt.plot(x_grid, y_grid, color='crimson', label='Best fit (selected range)')
-    plt.fill_between(x_grid, low, high, color='gold', alpha=0.25, label='95% pred. band (classic)')
-    plt.fill_between(x_grid, band_low, band_high, color='lightcoral', alpha=0.25, label='95% pred. band (wild bootstrap)')
-    plt.xlabel('Time (s)')
-    plt.ylabel('Delta Mass (g)')
-    plt.title('Drift: Delta Mass vs Time')
-    eqn = f"y = {gradient:.8f}x + {intercept:.8f}\nR²={r2:.3f}, RMSE={rmse:.4f}"
-    plt.text(0.05, 0.95, eqn, transform=plt.gca().transAxes, fontsize=10, verticalalignment='top', bbox=dict(facecolor='white', alpha=0.7))
-    plt.grid(True)
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
+    ax.plot(x_grid, y_grid, color=color)
+    ax.fill_between(x_grid, low, high, color='gold', alpha=0.25)
+    ax.fill_between(x_grid, band_low, band_high, color='lightcoral', alpha=0.25)
+    ax.set_xlabel('Time (s)')
+    ax.set_ylabel('Delta Mass (g)')
+    if show_title:
+        ax.set_title('Drift: Delta Mass vs Time')
+        eqn = f"y = {gradient:.8f}x + {intercept:.8f}\nR²={r2:.3f}, RMSE={rmse:.4f}"
+        ax.text(0.05, 0.95, eqn, transform=ax.transAxes, fontsize=10, verticalalignment='top', bbox=dict(facecolor='white', alpha=0.7))
+    ax.grid(True)
+    if label or not show_title:
+        ax.legend()
+    if created_ax:
+        plt.tight_layout()
+        plt.show()
 
 
 def main():
