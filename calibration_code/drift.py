@@ -226,7 +226,7 @@ def main():
     print(f"  95% CI: [{ci_low:.3f}, {ci_high:.3f}] uL/s")
 
     # --- Run dual experiment for both pumps ---
-    times, masses = run_dual_experiment(in_pump, x_in_target*1000, out_pump, x_out_target*1000, duration=3600, measurement_interval=15, flow_rate_ul_s=flow_rate_ul_s, letter=letter)
+    times, masses = run_dual_experiment(in_pump, x_in_target*1000, out_pump, x_out_target*1000, duration=1800, measurement_interval=15, flow_rate_ul_s=flow_rate_ul_s, letter=letter)
     
     # # Plot
     # plt.figure(figsize=(10,6))

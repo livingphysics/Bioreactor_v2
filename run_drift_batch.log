@@ -8,3 +8,77 @@
 2025-06-13 13:02:28,189 INFO: Success: Letter=A, Flow=8.0 uL/s on attempt 1
 2025-06-13 13:02:28,193 INFO: Starting run: Letter=A, Flow=10.0 uL/s, Attempt=1
 2025-06-13 13:06:23,579 INFO: Starting run: Letter=A, Flow=4.0 uL/s, Attempt=1
+2025-06-13 15:00:22,833 INFO: Starting run: Letter=A, Flow=4.0 uL/s, Attempt=1
+2025-06-13 15:05:04,230 INFO: Starting run: Letter=A, Flow=4.0 uL/s, Attempt=1
+2025-06-13 15:08:05,799 INFO: Starting run: Letter=A, Flow=4.0 uL/s, Attempt=1
+2025-06-13 15:54:02,162 INFO: Success: Letter=A, Flow=4.0 uL/s on attempt 1
+2025-06-13 15:54:02,163 INFO: Starting run: Letter=B, Flow=4.0 uL/s, Attempt=1
+2025-06-13 16:39:23,706 INFO: Success: Letter=B, Flow=4.0 uL/s on attempt 1
+2025-06-13 16:39:23,706 INFO: Starting run: Letter=C, Flow=4.0 uL/s, Attempt=1
+2025-06-13 17:25:19,289 INFO: Success: Letter=C, Flow=4.0 uL/s on attempt 1
+2025-06-13 17:25:19,290 INFO: Starting run: Letter=D, Flow=4.0 uL/s, Attempt=1
+2025-06-13 18:10:34,316 INFO: Success: Letter=D, Flow=4.0 uL/s on attempt 1
+2025-06-13 18:10:34,320 INFO: Starting run: Letter=A, Flow=6.0 uL/s, Attempt=1
+2025-06-13 18:57:01,655 INFO: Success: Letter=A, Flow=6.0 uL/s on attempt 1
+2025-06-13 18:57:01,656 INFO: Starting run: Letter=B, Flow=6.0 uL/s, Attempt=1
+2025-06-13 19:42:22,945 INFO: Success: Letter=B, Flow=6.0 uL/s on attempt 1
+2025-06-13 19:42:22,945 INFO: Starting run: Letter=C, Flow=6.0 uL/s, Attempt=1
+2025-06-13 20:27:57,862 INFO: Success: Letter=C, Flow=6.0 uL/s on attempt 1
+2025-06-13 20:27:57,862 INFO: Starting run: Letter=D, Flow=6.0 uL/s, Attempt=1
+2025-06-13 21:13:16,521 INFO: Success: Letter=D, Flow=6.0 uL/s on attempt 1
+2025-06-13 21:13:16,521 INFO: Starting run: Letter=A, Flow=8.0 uL/s, Attempt=1
+2025-06-13 21:58:31,638 INFO: Success: Letter=A, Flow=8.0 uL/s on attempt 1
+2025-06-13 21:58:31,638 INFO: Starting run: Letter=B, Flow=8.0 uL/s, Attempt=1
+2025-06-13 22:41:25,107 INFO: Success: Letter=B, Flow=8.0 uL/s on attempt 1
+2025-06-13 22:41:25,108 INFO: Starting run: Letter=C, Flow=8.0 uL/s, Attempt=1
+2025-06-13 23:26:18,454 INFO: Success: Letter=C, Flow=8.0 uL/s on attempt 1
+2025-06-13 23:26:18,454 INFO: Starting run: Letter=D, Flow=8.0 uL/s, Attempt=1
+2025-06-14 00:11:17,489 INFO: Success: Letter=D, Flow=8.0 uL/s on attempt 1
+2025-06-14 00:11:17,489 INFO: Starting run: Letter=A, Flow=10.0 uL/s, Attempt=1
+2025-06-14 00:56:26,469 INFO: Success: Letter=A, Flow=10.0 uL/s on attempt 1
+2025-06-14 00:56:26,469 INFO: Starting run: Letter=B, Flow=10.0 uL/s, Attempt=1
+2025-06-14 01:41:55,347 INFO: Success: Letter=B, Flow=10.0 uL/s on attempt 1
+2025-06-14 01:41:55,348 INFO: Starting run: Letter=C, Flow=10.0 uL/s, Attempt=1
+2025-06-14 02:26:57,465 INFO: Success: Letter=C, Flow=10.0 uL/s on attempt 1
+2025-06-14 02:26:57,466 INFO: Starting run: Letter=D, Flow=10.0 uL/s, Attempt=1
+2025-06-14 03:11:03,830 INFO: Success: Letter=D, Flow=10.0 uL/s on attempt 1
+2025-06-14 03:11:03,831 INFO: Starting run: Letter=A, Flow=12.0 uL/s, Attempt=1
+2025-06-14 03:56:31,156 INFO: Success: Letter=A, Flow=12.0 uL/s on attempt 1
+2025-06-14 03:56:31,157 INFO: Starting run: Letter=B, Flow=12.0 uL/s, Attempt=1
+2025-06-14 04:41:24,122 INFO: Success: Letter=B, Flow=12.0 uL/s on attempt 1
+2025-06-14 04:41:24,123 INFO: Starting run: Letter=C, Flow=12.0 uL/s, Attempt=1
+2025-06-14 05:25:48,532 INFO: Success: Letter=C, Flow=12.0 uL/s on attempt 1
+2025-06-14 05:25:48,536 INFO: Starting run: Letter=D, Flow=12.0 uL/s, Attempt=1
+2025-06-14 06:10:07,148 INFO: Success: Letter=D, Flow=12.0 uL/s on attempt 1
+2025-06-14 06:10:07,149 INFO: Starting run: Letter=A, Flow=14.0 uL/s, Attempt=1
+2025-06-14 06:55:41,299 INFO: Success: Letter=A, Flow=14.0 uL/s on attempt 1
+2025-06-14 06:55:41,299 INFO: Starting run: Letter=B, Flow=14.0 uL/s, Attempt=1
+2025-06-14 07:40:18,519 INFO: Success: Letter=B, Flow=14.0 uL/s on attempt 1
+2025-06-14 07:40:18,519 INFO: Starting run: Letter=C, Flow=14.0 uL/s, Attempt=1
+2025-06-14 08:24:49,210 INFO: Success: Letter=C, Flow=14.0 uL/s on attempt 1
+2025-06-14 08:24:49,210 INFO: Starting run: Letter=D, Flow=14.0 uL/s, Attempt=1
+2025-06-14 09:09:39,047 INFO: Success: Letter=D, Flow=14.0 uL/s on attempt 1
+2025-06-14 09:09:39,048 INFO: Starting run: Letter=A, Flow=16.0 uL/s, Attempt=1
+2025-06-14 09:55:50,389 INFO: Success: Letter=A, Flow=16.0 uL/s on attempt 1
+2025-06-14 09:55:50,389 INFO: Starting run: Letter=B, Flow=16.0 uL/s, Attempt=1
+2025-06-14 10:40:24,510 INFO: Success: Letter=B, Flow=16.0 uL/s on attempt 1
+2025-06-14 10:40:24,510 INFO: Starting run: Letter=C, Flow=16.0 uL/s, Attempt=1
+2025-06-14 11:25:36,403 INFO: Success: Letter=C, Flow=16.0 uL/s on attempt 1
+2025-06-14 11:25:36,403 INFO: Starting run: Letter=D, Flow=16.0 uL/s, Attempt=1
+2025-06-14 12:10:26,199 INFO: Success: Letter=D, Flow=16.0 uL/s on attempt 1
+2025-06-14 12:10:26,200 INFO: Starting run: Letter=A, Flow=18.0 uL/s, Attempt=1
+2025-06-14 12:57:06,141 INFO: Success: Letter=A, Flow=18.0 uL/s on attempt 1
+2025-06-14 12:57:06,141 INFO: Starting run: Letter=B, Flow=18.0 uL/s, Attempt=1
+2025-06-14 13:41:21,396 INFO: Success: Letter=B, Flow=18.0 uL/s on attempt 1
+2025-06-14 13:41:21,397 INFO: Starting run: Letter=C, Flow=18.0 uL/s, Attempt=1
+2025-06-14 14:26:33,205 INFO: Success: Letter=C, Flow=18.0 uL/s on attempt 1
+2025-06-14 14:26:33,206 INFO: Starting run: Letter=D, Flow=18.0 uL/s, Attempt=1
+2025-06-14 15:12:22,841 INFO: Success: Letter=D, Flow=18.0 uL/s on attempt 1
+2025-06-14 15:12:22,847 INFO: Starting run: Letter=A, Flow=20.0 uL/s, Attempt=1
+2025-06-14 15:58:47,958 INFO: Success: Letter=A, Flow=20.0 uL/s on attempt 1
+2025-06-14 15:58:47,958 INFO: Starting run: Letter=B, Flow=20.0 uL/s, Attempt=1
+2025-06-14 16:38:51,516 INFO: Success: Letter=B, Flow=20.0 uL/s on attempt 1
+2025-06-14 16:38:51,516 INFO: Starting run: Letter=C, Flow=20.0 uL/s, Attempt=1
+2025-06-14 17:23:25,612 INFO: Success: Letter=C, Flow=20.0 uL/s on attempt 1
+2025-06-14 17:23:25,612 INFO: Starting run: Letter=D, Flow=20.0 uL/s, Attempt=1
+2025-06-14 18:08:37,509 INFO: Success: Letter=D, Flow=20.0 uL/s on attempt 1
