@@ -14,13 +14,8 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 import numpy as np
 import argparse
-
-# --- Helper to import plot_drift.py as a module ---
-PLOT_DRIFT_PATH = os.path.join(os.path.dirname(__file__), 'plot_drift.py')
-spec = importlib.util.spec_from_file_location('plot_drift', PLOT_DRIFT_PATH)
-plot_drift_mod = importlib.util.module_from_spec(spec)
-sys.modules['plot_drift'] = plot_drift_mod
-spec.loader.exec_module(plot_drift_mod)
+from calibration_code.calibration_utils import plot_with_fit_and_bands, find_most_recent_file
+import pandas as pd
 
 # --- Parse command-line argument (letter and mode) ---
 def get_letter_and_mode():
@@ -34,20 +29,6 @@ def get_letter_and_mode():
         sys.exit(1)
     return letter, args.combined
 
-# --- Find the most recent file for a given letter and flow rate ---
-def find_most_recent_file(folder, letter, flow):
-    pattern = re.compile(r"(\d{{6}})_drift_{}_{}_0_results\.csv".format(letter, flow))
-    most_recent_date = None
-    most_recent_file = None
-    for fname in os.listdir(folder):
-        m = pattern.match(fname)
-        if m:
-            date = m.group(1)
-            if (most_recent_date is None) or (date > most_recent_date):
-                most_recent_date = date
-                most_recent_file = os.path.join(folder, fname)
-    return most_recent_file, most_recent_date
-
 # --- Main CLI app ---
 def main():
     letter, combined = get_letter_and_mode()
@@ -57,8 +38,9 @@ def main():
     files = []
     dates = []
     print(f"Looking for most recent files for letter {letter} and flow rates {flow_rates}...")
+    pattern_template = "{date}_drift_{letter}_{flow}_0_results.csv"
     for flow in flow_rates:
-        f, d = find_most_recent_file(folder, letter, flow)
+        f, d = find_most_recent_file(folder, pattern_template, {"letter": letter, "flow": flow})
         files.append(f)
         dates.append(d)
     if all(f is None for f in files):
@@ -72,9 +54,12 @@ def main():
         for idx, (flow, path, date) in enumerate(zip(flow_rates, files, dates)):
             if path is not None:
                 try:
+                    df = pd.read_csv(path, comment='#')
+                    x = df['time_s'].values
+                    y = df['delta_mass_g'].values
                     label = f"{flow} uL/s (Date: {date})"
                     color = cmap(idx)
-                    plot_drift_mod.plot_drift(path, ax=ax, label=label, show_title=False, color=color)
+                    plot_with_fit_and_bands(x, y, ax=ax, label=label, color=color, show_title=False)
                 except Exception as e:
                     print(f"Error plotting {flow} uL/s: {e}")
             else:
@@ -91,8 +76,11 @@ def main():
             ax = axes[i]
             if path is not None:
                 try:
+                    df = pd.read_csv(path, comment='#')
+                    x = df['time_s'].values
+                    y = df['delta_mass_g'].values
                     label = f"{flow} uL/s (Date: {date})"
-                    plot_drift_mod.plot_drift(path, ax=ax, label=label, show_title=True, color='b')
+                    plot_with_fit_and_bands(x, y, ax=ax, label=label, color='b', show_title=True)
                 except Exception as e:
                     ax.text(0.5, 0.5, f"Error: {e}", ha='center', va='center')
                     ax.set_title(f"{letter}, {flow} uL/s\n(Date: {date})")

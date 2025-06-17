@@ -15,12 +15,11 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 from tqdm import trange
 import matplotlib.pyplot as plt
-import serial
 import re
 from math import floor
 import time
-from ticlib import TicUSB
 from glob import glob
+from calibration_code.calibration_utils import run_drift
 
 
 def load_and_fit(csv_path):
@@ -59,102 +58,6 @@ SERIAL_PORT_SCALE = "/dev/ttyUSB0"  # Update if needed
 BAUDRATE = 9600
 TOLERANCE = 0.001
 READ_TIMEOUT = 1
-
-
-def parse_weight(s: str) -> float:
-    m = re.search(r'[-+]?\d*\.\d+|\d+', s)
-    return float(m.group()) if m else None
-
-def read_stable_weight():
-    ser = serial.Serial(port=SERIAL_PORT_SCALE,
-                        baudrate=BAUDRATE,
-                        bytesize=serial.EIGHTBITS,
-                        parity=serial.PARITY_NONE,
-                        stopbits=serial.STOPBITS_ONE,
-                        timeout=READ_TIMEOUT)
-    prev = None
-    while True:
-        ser.write(b'w')
-        raw = ser.read(18)
-        try:
-            text = raw.decode('ascii', errors='ignore')
-        except:
-            continue
-        w = parse_weight(text)
-        if w is None:
-            continue
-        if prev is not None and abs(w - prev) < TOLERANCE:
-            ser.close()
-            del ser
-            return w
-        prev = w
-        time.sleep(3.0)
-
-# --- Pump driving utilities (from debubblify.py) ---
-STEP_MODE = 3
-STEPS_PER_PULSE = 0.5 ** STEP_MODE
-
-def init_pump(pump_serial):
-    pump = TicUSB(serial_number=pump_serial)
-    pump.energize()
-    pump.exit_safe_start()
-    pump.set_step_mode(STEP_MODE)
-    pump.set_current_limit(32)
-    return pump
-
-def stop_pump(pump):
-    pump.set_target_velocity(0)
-    pump.deenergize()
-    pump.enter_safe_start()
-    del pump
-
-def run_dual_experiment(in_pump_serial, in_steps_rate, out_pump_serial, out_steps_rate, duration=3600, measurement_interval=15, csv_output_path=None, flow_rate_ul_s=None, letter=None):
-    if csv_output_path is None:
-        from datetime import datetime
-        date_str = datetime.now().strftime('%y%m%d')
-        flow_str = f"{flow_rate_ul_s:.1f}".replace('.', '_')
-        csv_output_path = f"drift_results/{date_str}_drift_{letter}_{flow_str}_results.csv"
-    print(f"\nRunning dual experiment for {duration//60} minutes...")
-    # Setup both pumps
-    in_velocity = int(floor(in_steps_rate / STEPS_PER_PULSE))
-    out_velocity = int(floor(out_steps_rate / STEPS_PER_PULSE))
-
-    # Data storage
-    times = [0.0]
-    masses = [0.0,]
-    data_rows = [(0.0, 0.0)]  # For CSV: (time, delta_mass)
-    initial_mass = read_stable_weight()
-    t_exp = 0.0
-    measurement_number = 0
-    while t_exp < duration:
-        in_pump = init_pump(in_pump_serial)
-        out_pump = init_pump(out_pump_serial)
-
-        # Start both pumps
-        t_measurement_start = time.time()
-        while time.time() - t_measurement_start <= measurement_interval:
-            in_pump.set_target_velocity(in_velocity)
-            out_pump.set_target_velocity(out_velocity)
-        t_exp += time.time() - t_measurement_start
-        
-        # Stop both pumps
-        stop_pump(in_pump)
-        stop_pump(out_pump)
-        
-        # Pause for measurement
-        mass = read_stable_weight()
-        times.append(t_exp)
-        delta_mass = mass - initial_mass
-        masses.append(delta_mass)
-        data_rows.append((t_exp, delta_mass))
-        print(f"  t={t_exp:.1f}s, delta_mass={delta_mass:.4f}g")
-    
-    # Write to CSV
-    df = pd.DataFrame(data_rows, columns=["time_s", "delta_mass_g"])
-    df.to_csv(csv_output_path, index=False)
-    print(f"Experiment data saved to {csv_output_path}")
-    
-    return times, masses
 
 
 def main():
@@ -226,22 +129,11 @@ def main():
     print(f"  95% CI: [{ci_low:.3f}, {ci_high:.3f}] uL/s")
 
     # --- Run dual experiment for both pumps ---
-    times, masses = run_dual_experiment(in_pump, x_in_target*1000, out_pump, x_out_target*1000, duration=1800, measurement_interval=15, flow_rate_ul_s=flow_rate_ul_s, letter=letter)
-    
-    # # Plot
-    # plt.figure(figsize=(10,6))
-    # plt.plot(times, masses, '+-', label=f'Δmass')
-    # # Overlay CI lines: y = grad*x and y = grad*sqrt(x/60) for grad_in and grad_out
-    # x_grid = np.linspace(0, max(times), 100)
-    # for grad, color in zip([grad_in, grad_out], ['red', 'blue']):
-        # plt.plot(x_grid, grad * x_grid / 1e6, '--', color=color, label=f'y={grad:.3f}·x (uL/s)')
-        # plt.plot(x_grid, grad * np.sqrt(x_grid/60) / 1e6, ':', color=color, label=f'y={grad:.3f}·sqrt(x/60) (uL/s)')
-    # plt.xlabel('Experiment time (s)')
-    # plt.ylabel('Δmass (g)')
-    # plt.title(f'Dual Pump Δmass vs. time at {x_in_target:.1f} & {x_out_target:.1f} steps/sec')
-    # plt.legend()
-    # plt.tight_layout()
-    # plt.show()
+    times_masses = run_drift(
+        in_pump, x_in_target*1000, out_pump, x_out_target*1000,
+        duration=1800, measurement_times=None, # Drift mode: every 15s
+        csv_output_path=None, log_progress=True
+    )
 
 if __name__ == "__main__":
     main()

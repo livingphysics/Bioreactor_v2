@@ -43,4 +43,4 @@ for flow in FLOW_RATES:
                     time.sleep(1)  # Wait before retrying
         if not success:
             logging.error(f"Max retries reached: Letter={letter}, Flow={flow} uL/s. Skipping.")
-            print(f"Max retries reached for {letter} at {flow} uL/s. Skipping.") 
+            print(f"Max retries reached for {letter} at {flow} uL/s. Skipping.")
