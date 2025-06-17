@@ -13,6 +13,47 @@ from scipy.stats import t
 import matplotlib.colors as mcolors
 
 
+def get_drift_stats(csv_file, x_min=None, x_max=None):
+    """
+    Returns (rmse, avg_homoskedastic_band_width/2) for the linear fit to the drift data in csv_file.
+    """
+    df = pd.read_csv(csv_file, comment='#')
+    if not {'time_s', 'delta_mass_g'}.issubset(df.columns):
+        raise ValueError("CSV must contain 'time_s' and 'delta_mass_g' columns.")
+    x = df['time_s'].values
+    y = df['delta_mass_g'].values
+
+    if x_min is not None:
+        mask = x >= x_min
+    else:
+        mask = np.ones_like(x, dtype=bool)
+    if x_max is not None:
+        mask = mask & (x <= x_max)
+    x_fit = x[mask]
+    y_fit = y[mask]
+
+    model = LinearRegression()
+    X_fit = x_fit.reshape(-1, 1)
+    model.fit(X_fit, y_fit)
+    y_pred_fit = model.predict(X_fit)
+    rmse = np.sqrt(np.mean((y_fit - y_pred_fit) ** 2))
+
+    # Homoskedastic (classic) prediction band
+    x_grid = np.linspace(x_fit.min(), x_fit.max(), 200)
+    n = len(x_fit)
+    dof = n - 2
+    s = np.sqrt(np.sum((y_fit - y_pred_fit) ** 2) / dof)
+    x_bar = x_fit.mean()
+    Sxx = np.sum((x_fit - x_bar) ** 2)
+    se_pred = s * np.sqrt(1 + 1/n + (x_grid - x_bar) ** 2 / Sxx)
+    t_crit = t.ppf(0.975, dof)
+    y_grid = model.predict(x_grid.reshape(-1, 1))
+    low = y_grid - t_crit * se_pred
+    high = y_grid + t_crit * se_pred
+    avg_band_width = np.mean(high - low)
+    return rmse, avg_band_width / 2
+
+
 def plot_drift(csv_file, x_min=None, x_max=None, ax=None, label=None, show_title=True, color='b'):
     # Read the CSV file
     df = pd.read_csv(csv_file, comment='#')
