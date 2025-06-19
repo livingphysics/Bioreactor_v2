@@ -26,7 +26,7 @@ from src.config import Config as cfg
 def get_most_recent_calibration(letter, pump_type):
     """
     Find the most recent calibration file for a given letter and pump type (in/out).
-    Returns the file path and the gradient (ml_per_step) from the calibration.
+    Returns the file path, gradient (ml_per_step), and intercept from the calibration.
     """
     calib_dir = 'calibration_results'
     
@@ -49,8 +49,9 @@ def get_most_recent_calibration(letter, pump_type):
     model = LinearRegression()
     model.fit(X.reshape(-1, 1), y)
     gradient = model.coef_[0]  # This is ml_per_step in µL/s per 1000 steps/s
+    intercept = model.intercept_  # This is the intercept in µL/s
     
-    return most_recent_file, gradient
+    return most_recent_file, gradient, intercept
 
 
 def get_most_recent_drift_result(letter, flow_rate):
@@ -101,20 +102,23 @@ def calculate_corrected_rates(letter, target_flow_rate):
     print(f"Calculating corrected rates for pump {letter} at flow rate {target_flow_rate} µL/s...")
     
     # Get most recent calibrations
-    in_calib_file, in_gradient = get_most_recent_calibration(letter, 'in')
-    out_calib_file, out_gradient = get_most_recent_calibration(letter, 'out')
+    in_calib_file, in_gradient, in_intercept = get_most_recent_calibration(letter, 'in')
+    out_calib_file, out_gradient, out_intercept = get_most_recent_calibration(letter, 'out')
     
     print(f"  In pump calibration: {os.path.basename(in_calib_file)}")
     print(f"  Out pump calibration: {os.path.basename(out_calib_file)}")
     print(f"  In pump gradient: {in_gradient:.6f} µL/s per 1000 steps/s")
     print(f"  Out pump gradient: {out_gradient:.6f} µL/s per 1000 steps/s")
+    print(f"  In pump intercept: {in_intercept:.6f} µL/s")
+    print(f"  Out pump intercept: {out_intercept:.6f} µL/s")
     
-    # Calculate naive step rates (target_flow_rate is already in µL/s)
-    in_steps_rate = (target_flow_rate / in_gradient) * 1000  # Convert back to steps/s
-    out_steps_rate = (target_flow_rate / out_gradient) * 1000
+    # Calculate step rates accounting for intercept (target_flow_rate is already in µL/s)
+    # Using the formula: steps_rate = (target_flow_rate - intercept) / gradient
+    in_steps_rate = ((target_flow_rate - in_intercept) / in_gradient) * 1000  # Convert back to steps/s
+    out_steps_rate = ((target_flow_rate - out_intercept) / out_gradient) * 1000
     
-    print(f"  Naive in pump rate: {in_steps_rate:.1f} steps/s")
-    print(f"  Naive out pump rate: {out_steps_rate:.1f} steps/s")
+    print(f"  Calculated in pump rate: {in_steps_rate:.1f} steps/s")
+    print(f"  Calculated out pump rate: {out_steps_rate:.1f} steps/s")
     
     # Get most recent drift result and calculate drift rate
     try:
