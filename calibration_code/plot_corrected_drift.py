@@ -1,6 +1,6 @@
 """
 Example usage:
-    python -m calibration_code.plot_corrected_drift <letter> <flow_rate>
+    python -m calibration_code.plot_corrected_drift
 
 This script performs drift correction by:
 1. Finding the most recent calibrations for in and out pumps
