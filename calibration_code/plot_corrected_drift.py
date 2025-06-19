@@ -61,7 +61,8 @@ def get_most_recent_drift_result(letter, flow_rate):
     drift_dir = 'drift_results'
     
     # Find all drift files for this letter and flow rate
-    pattern = f"{drift_dir}/*drift_{letter}_{flow_rate}_0_results.csv"
+    formatted_flow_rate = format_flow_rate_for_filename(flow_rate)
+    pattern = f"{drift_dir}/*drift_{letter}_{formatted_flow_rate}_results.csv"
     matches = glob.glob(pattern)
     
     if not matches:
@@ -197,38 +198,24 @@ def plot_corrected_drift(csv_file, ax=None, label=None, show_title=True):
     plot_with_fit_and_bands(x, y, ax=ax, label=label, show_title=show_title)
 
 
-def main():
-    if len(sys.argv) != 3:
-        print(f"Usage: python {sys.argv[0]} <letter> <flow_rate>")
-        print("Example: python plot_corrected_drift.py A 20")
-        sys.exit(1)
+def main():    
+    experiments = [('A',14.0),('B',6.0),('C',16.0),('D',4.0)]
     
-    letter = sys.argv[1].upper()
-    flow_rate = float(sys.argv[2])
-    
-    # Validate inputs
-    if letter not in ['A', 'B', 'C', 'D']:
-        print("Error: Letter must be A, B, C, or D")
-        sys.exit(1)
-    
-    if flow_rate <= 0:
-        print("Error: Flow rate must be positive")
-        sys.exit(1)
-    
-    try:
-        # Run the corrected drift experiment
-        output_file, data_rows = run_corrected_drift(letter, flow_rate)
-        
-        # Plot the results
-        print(f"\nPlotting results...")
-        plot_corrected_drift(output_file, label=f"Corrected drift {letter} {flow_rate} µL/s")
-        
-        print(f"\nExperiment completed successfully!")
-        print(f"Results saved to: {output_file}")
-        
-    except Exception as e:
-        print(f"Error: {e}")
-        sys.exit(1)
+    for letter, flow_rate in experiments:
+        try:
+            # Run the corrected drift experiment
+            output_file, data_rows = run_corrected_drift(letter, flow_rate)
+            
+            # Plot the results
+            # print(f"\nPlotting results...")
+            # plot_corrected_drift(output_file, label=f"Corrected drift {letter} {flow_rate} µL/s")
+            
+            print(f"\nExperiment completed successfully!")
+            print(f"Results saved to: {output_file}")
+            
+        except Exception as e:
+            print(f"Error: {e}")
+            sys.exit(1)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,568 @@
+Calculating corrected rates for pump A at flow rate 14.0 µL/s...
+  In pump calibration: 20250609_calibration_A_in_forward_results.csv
+  Out pump calibration: 20250609_calibration_A_out_forward_results.csv
+  In pump gradient: 0.094084 µL/s per 1000 steps/s
+  Out pump gradient: 0.093751 µL/s per 1000 steps/s
+  Naive in pump rate: 148802.5 steps/s
+  Naive out pump rate: 149332.4 steps/s
+  Drift result: 250614_drift_A_14_0_results.csv
+  Drift rate: 0.000692 g/s
+  Drift correction: 7379.4 steps/s
+  Corrected out pump rate: 156711.9 steps/s
+
+Running corrected drift experiment...
+  Duration: 1800 seconds (30 minutes)
+  Output file: drift_corrected_results/250619_drift_corrected_A_14_0_results.csv
+
+Running experiment for 30 minutes...
+  t=0.0s, delta_mass=-0.0040g
+  t=15.0s, delta_mass=-0.0030g
+  t=30.0s, delta_mass=-0.0320g
+  t=45.0s, delta_mass=-0.0870g
+  t=60.0s, delta_mass=-0.1510g
+  t=75.0s, delta_mass=-0.2080g
+  t=90.0s, delta_mass=-0.2340g
+  t=105.0s, delta_mass=-0.2920g
+  t=120.0s, delta_mass=-0.2950g
+  t=135.0s, delta_mass=-0.0930g
+  t=150.0s, delta_mass=-0.1140g
+  t=165.0s, delta_mass=-0.1280g
+  t=180.0s, delta_mass=-0.1630g
+  t=195.0s, delta_mass=-0.1860g
+  t=210.0s, delta_mass=-0.2000g
+  t=225.0s, delta_mass=-0.2220g
+  t=240.0s, delta_mass=-0.2290g
+  t=255.0s, delta_mass=-0.2400g
+  t=270.0s, delta_mass=-0.2590g
+  t=285.0s, delta_mass=-0.2600g
+  t=300.0s, delta_mass=-0.2860g
+  t=315.0s, delta_mass=-0.3020g
+  t=330.0s, delta_mass=-0.3070g
+  t=345.0s, delta_mass=-0.3230g
+  t=360.0s, delta_mass=-0.3290g
+  t=375.0s, delta_mass=-0.3340g
+  t=390.0s, delta_mass=-0.3550g
+  t=405.0s, delta_mass=-0.3500g
+  t=420.0s, delta_mass=-0.3630g
+  t=435.0s, delta_mass=-0.3750g
+  t=450.0s, delta_mass=-0.3700g
+  t=465.0s, delta_mass=-0.3840g
+  t=480.0s, delta_mass=-0.3900g
+  t=495.0s, delta_mass=-0.3900g
+  t=510.0s, delta_mass=-0.4040g
+  t=525.0s, delta_mass=-0.4050g
+  t=540.0s, delta_mass=-0.4140g
+  t=555.0s, delta_mass=-0.4290g
+  t=570.0s, delta_mass=-0.4270g
+  t=585.0s, delta_mass=-0.4410g
+  t=600.0s, delta_mass=-0.4460g
+  t=615.0s, delta_mass=-0.4490g
+  t=630.0s, delta_mass=-0.4710g
+  t=645.0s, delta_mass=-0.4720g
+  t=660.0s, delta_mass=-0.4850g
+  t=675.0s, delta_mass=-0.5080g
+  t=690.0s, delta_mass=-0.5020g
+  t=705.0s, delta_mass=-0.5150g
+  t=720.0s, delta_mass=-0.5290g
+  t=735.0s, delta_mass=-0.5240g
+  t=750.0s, delta_mass=-0.5440g
+  t=765.0s, delta_mass=-0.5570g
+  t=780.0s, delta_mass=-0.5570g
+  t=795.0s, delta_mass=-0.5750g
+  t=810.0s, delta_mass=-0.5700g
+  t=825.0s, delta_mass=-0.5850g
+  t=840.0s, delta_mass=-0.6020g
+  t=855.0s, delta_mass=-0.6000g
+  t=870.0s, delta_mass=-0.6190g
+  t=885.0s, delta_mass=-0.6260g
+  t=900.0s, delta_mass=-0.6270g
+  t=915.0s, delta_mass=-0.6420g
+  t=930.0s, delta_mass=-0.6460g
+  t=945.0s, delta_mass=-0.6540g
+  t=960.0s, delta_mass=-0.6720g
+  t=975.0s, delta_mass=-0.6710g
+  t=990.0s, delta_mass=-0.6840g
+  t=1005.0s, delta_mass=-0.6920g
+  t=1020.0s, delta_mass=-0.6900g
+  t=1035.0s, delta_mass=-0.7060g
+  t=1050.0s, delta_mass=-0.7100g
+  t=1065.0s, delta_mass=-0.7150g
+  t=1080.0s, delta_mass=-0.7330g
+  t=1095.0s, delta_mass=-0.7320g
+  t=1110.0s, delta_mass=-0.7440g
+  t=1125.0s, delta_mass=-0.7660g
+  t=1140.0s, delta_mass=-0.7640g
+  t=1155.0s, delta_mass=-0.7840g
+  t=1170.0s, delta_mass=-0.7880g
+  t=1185.0s, delta_mass=-0.7840g
+  t=1200.0s, delta_mass=-0.8000g
+  t=1215.0s, delta_mass=-0.7980g
+  t=1230.0s, delta_mass=-0.8030g
+  t=1245.0s, delta_mass=-0.8560g
+  t=1260.0s, delta_mass=-0.8200g
+  t=1275.0s, delta_mass=-0.8350g
+  t=1290.0s, delta_mass=-0.8590g
+  t=1305.0s, delta_mass=-0.8600g
+  t=1320.0s, delta_mass=-0.8680g
+  t=1335.0s, delta_mass=-0.8700g
+  t=1350.0s, delta_mass=-0.8680g
+  t=1365.0s, delta_mass=-0.8700g
+  t=1380.0s, delta_mass=-0.8560g
+  t=1395.0s, delta_mass=-0.8660g
+  t=1410.0s, delta_mass=-0.8820g
+  t=1425.0s, delta_mass=-0.8880g
+  t=1440.0s, delta_mass=-0.8990g
+  t=1455.0s, delta_mass=-0.9090g
+  t=1470.0s, delta_mass=-0.9090g
+  t=1485.0s, delta_mass=-0.9250g
+  t=1500.0s, delta_mass=-0.9320g
+  t=1515.0s, delta_mass=-0.9510g
+  t=1530.0s, delta_mass=-0.9640g
+  t=1545.0s, delta_mass=-0.9610g
+  t=1560.0s, delta_mass=-0.9770g
+  t=1575.0s, delta_mass=-0.9840g
+  t=1590.0s, delta_mass=-0.9830g
+  t=1605.0s, delta_mass=-1.0060g
+  t=1620.0s, delta_mass=-1.0090g
+  t=1635.0s, delta_mass=-1.0130g
+  t=1650.0s, delta_mass=-1.0280g
+  t=1665.0s, delta_mass=-1.0260g
+  t=1680.0s, delta_mass=-1.0410g
+  t=1695.0s, delta_mass=-1.0560g
+  t=1710.0s, delta_mass=-1.0530g
+  t=1725.0s, delta_mass=-1.0690g
+  t=1740.0s, delta_mass=-1.0720g
+  t=1755.0s, delta_mass=-1.0770g
+  t=1770.0s, delta_mass=-1.0930g
+  t=1785.0s, delta_mass=-1.0920g
+  t=1800.0s, delta_mass=-1.1030g
+Experiment data saved to drift_corrected_results/250619_drift_corrected_A_14_0_results.csv
+
+Experiment completed successfully!
+Results saved to: drift_corrected_results/250619_drift_corrected_A_14_0_results.csv
+Calculating corrected rates for pump B at flow rate 6.0 µL/s...
+  In pump calibration: 20250609_calibration_B_in_forward_results.csv
+  Out pump calibration: 20250609_calibration_B_out_forward_results.csv
+  In pump gradient: 0.093366 µL/s per 1000 steps/s
+  Out pump gradient: 0.094724 µL/s per 1000 steps/s
+  Naive in pump rate: 64263.4 steps/s
+  Naive out pump rate: 63341.9 steps/s
+  Drift result: 250613_drift_B_6_0_results.csv
+  Drift rate: -0.000121 g/s
+  Drift correction: -1279.4 steps/s
+  Corrected out pump rate: 62062.6 steps/s
+
+Running corrected drift experiment...
+  Duration: 1800 seconds (30 minutes)
+  Output file: drift_corrected_results/250619_drift_corrected_B_6_0_results.csv
+
+Running experiment for 30 minutes...
+  t=0.0s, delta_mass=0.0000g
+  t=15.0s, delta_mass=-0.0020g
+  t=30.0s, delta_mass=-0.0070g
+  t=45.0s, delta_mass=-0.0070g
+  t=60.0s, delta_mass=-0.0070g
+  t=75.0s, delta_mass=-0.0080g
+  t=90.0s, delta_mass=-0.0200g
+  t=105.0s, delta_mass=-0.0370g
+  t=120.0s, delta_mass=-0.0390g
+  t=135.0s, delta_mass=-0.0380g
+  t=150.0s, delta_mass=-0.0410g
+  t=165.0s, delta_mass=-0.0550g
+  t=180.0s, delta_mass=-0.0640g
+  t=195.0s, delta_mass=-0.0670g
+  t=210.0s, delta_mass=-0.0760g
+  t=225.0s, delta_mass=-0.0890g
+  t=240.0s, delta_mass=-0.1100g
+  t=255.0s, delta_mass=-0.1190g
+  t=270.0s, delta_mass=-0.1200g
+  t=285.0s, delta_mass=-0.1420g
+  t=300.0s, delta_mass=-0.1570g
+  t=315.0s, delta_mass=-0.1670g
+  t=330.0s, delta_mass=-0.1670g
+  t=345.0s, delta_mass=-0.1790g
+  t=360.0s, delta_mass=-0.1890g
+  t=375.0s, delta_mass=-0.2020g
+  t=390.0s, delta_mass=-0.1990g
+  t=405.0s, delta_mass=-0.1960g
+  t=420.0s, delta_mass=-0.1960g
+  t=435.0s, delta_mass=-0.2110g
+  t=450.0s, delta_mass=-0.2220g
+  t=465.0s, delta_mass=-0.3070g
+  t=480.0s, delta_mass=-0.3140g
+  t=495.0s, delta_mass=-0.3200g
+  t=510.0s, delta_mass=-0.3580g
+  t=525.0s, delta_mass=-0.4150g
+  t=540.0s, delta_mass=-0.4300g
+  t=555.0s, delta_mass=-0.4500g
+  t=570.0s, delta_mass=-0.4770g
+  t=585.0s, delta_mass=-0.4770g
+  t=600.0s, delta_mass=-0.5240g
+  t=615.0s, delta_mass=-0.5530g
+  t=630.0s, delta_mass=-0.5460g
+  t=645.0s, delta_mass=-0.5460g
+  t=660.0s, delta_mass=-0.5450g
+  t=675.0s, delta_mass=-0.5360g
+  t=690.0s, delta_mass=-0.5270g
+  t=705.0s, delta_mass=-0.5360g
+  t=720.0s, delta_mass=-0.5490g
+  t=735.0s, delta_mass=-0.5510g
+  t=750.0s, delta_mass=-0.5470g
+  t=765.0s, delta_mass=-0.5430g
+  t=780.0s, delta_mass=-0.5500g
+  t=795.0s, delta_mass=-0.5530g
+  t=810.0s, delta_mass=-0.5560g
+  t=825.0s, delta_mass=-0.5540g
+  t=840.0s, delta_mass=-0.5560g
+  t=855.0s, delta_mass=-0.5650g
+  t=870.0s, delta_mass=-0.5640g
+  t=885.0s, delta_mass=-0.5540g
+  t=900.0s, delta_mass=-0.5440g
+  t=915.0s, delta_mass=-0.5450g
+  t=930.0s, delta_mass=-0.5460g
+  t=945.0s, delta_mass=-0.5440g
+  t=960.0s, delta_mass=-0.5400g
+  t=975.0s, delta_mass=-0.5390g
+  t=990.0s, delta_mass=-0.5420g
+  t=1005.0s, delta_mass=-0.5370g
+  t=1020.0s, delta_mass=-0.5220g
+  t=1035.0s, delta_mass=-0.5170g
+  t=1050.0s, delta_mass=-0.5140g
+  t=1065.0s, delta_mass=-0.5260g
+  t=1080.0s, delta_mass=-0.5260g
+  t=1095.0s, delta_mass=-0.5210g
+  t=1110.0s, delta_mass=-0.5230g
+  t=1125.0s, delta_mass=-0.5280g
+  t=1140.0s, delta_mass=-0.5250g
+  t=1155.0s, delta_mass=-0.5160g
+  t=1170.0s, delta_mass=-0.5070g
+  t=1185.0s, delta_mass=-0.5120g
+  t=1200.0s, delta_mass=-0.5260g
+  t=1215.0s, delta_mass=-0.5280g
+  t=1230.0s, delta_mass=-0.5310g
+  t=1245.0s, delta_mass=-0.5310g
+  t=1260.0s, delta_mass=-0.5330g
+  t=1275.0s, delta_mass=-0.5330g
+  t=1290.0s, delta_mass=-0.5330g
+  t=1305.0s, delta_mass=-0.5240g
+  t=1320.0s, delta_mass=-0.5260g
+  t=1335.0s, delta_mass=-0.5370g
+  t=1350.0s, delta_mass=-0.5400g
+  t=1365.0s, delta_mass=-0.5330g
+  t=1380.0s, delta_mass=-0.5270g
+  t=1395.0s, delta_mass=-0.5200g
+  t=1410.0s, delta_mass=-0.5250g
+  t=1425.0s, delta_mass=-0.5230g
+  t=1440.0s, delta_mass=-0.5170g
+  t=1455.0s, delta_mass=-0.5160g
+  t=1470.0s, delta_mass=-0.5200g
+  t=1485.0s, delta_mass=-0.5240g
+  t=1500.0s, delta_mass=-0.5140g
+  t=1515.0s, delta_mass=-0.5000g
+  t=1530.0s, delta_mass=-0.4910g
+  t=1545.0s, delta_mass=-0.4990g
+  t=1560.0s, delta_mass=-0.4940g
+  t=1575.0s, delta_mass=-0.4940g
+  t=1590.0s, delta_mass=-0.4870g
+  t=1605.0s, delta_mass=-0.4950g
+  t=1620.0s, delta_mass=-0.4970g
+  t=1635.0s, delta_mass=-0.4850g
+  t=1650.0s, delta_mass=-0.4720g
+  t=1665.0s, delta_mass=-0.4650g
+  t=1680.0s, delta_mass=-0.4710g
+  t=1695.0s, delta_mass=-0.4770g
+  t=1710.0s, delta_mass=-0.4710g
+  t=1725.0s, delta_mass=-0.4640g
+  t=1740.0s, delta_mass=-0.4580g
+  t=1755.0s, delta_mass=-0.4580g
+  t=1770.0s, delta_mass=-0.4480g
+  t=1785.0s, delta_mass=-0.4420g
+  t=1800.0s, delta_mass=-0.4370g
+Experiment data saved to drift_corrected_results/250619_drift_corrected_B_6_0_results.csv
+
+Experiment completed successfully!
+Results saved to: drift_corrected_results/250619_drift_corrected_B_6_0_results.csv
+Calculating corrected rates for pump C at flow rate 16.0 µL/s...
+  In pump calibration: 20250609_calibration_C_in_forward_results.csv
+  Out pump calibration: 20250609_calibration_C_out_forward_results.csv
+  In pump gradient: 0.091734 µL/s per 1000 steps/s
+  Out pump gradient: 0.097240 µL/s per 1000 steps/s
+  Naive in pump rate: 174417.8 steps/s
+  Naive out pump rate: 164540.6 steps/s
+  Drift result: 250614_drift_C_16_0_results.csv
+  Drift rate: -0.000009 g/s
+  Drift correction: -90.0 steps/s
+  Corrected out pump rate: 164450.6 steps/s
+
+Running corrected drift experiment...
+  Duration: 1800 seconds (30 minutes)
+  Output file: drift_corrected_results/250619_drift_corrected_C_16_0_results.csv
+
+Running experiment for 30 minutes...
+  t=0.0s, delta_mass=0.0000g
+  t=15.0s, delta_mass=0.0430g
+  t=30.0s, delta_mass=0.0650g
+  t=45.0s, delta_mass=0.0690g
+  t=60.0s, delta_mass=0.0820g
+  t=75.0s, delta_mass=0.0910g
+  t=90.0s, delta_mass=0.0820g
+  t=105.0s, delta_mass=0.0260g
+  t=120.0s, delta_mass=-0.0550g
+  t=135.0s, delta_mass=-0.1540g
+  t=150.0s, delta_mass=-0.1770g
+  t=165.0s, delta_mass=-0.1830g
+  t=180.0s, delta_mass=-0.1730g
+  t=195.0s, delta_mass=-0.1660g
+  t=210.0s, delta_mass=-0.1570g
+  t=225.0s, delta_mass=-0.1630g
+  t=240.0s, delta_mass=-0.1650g
+  t=255.0s, delta_mass=-0.1440g
+  t=270.0s, delta_mass=-0.1430g
+  t=285.0s, delta_mass=-0.1570g
+  t=300.0s, delta_mass=-0.1440g
+  t=315.0s, delta_mass=-0.1250g
+  t=330.0s, delta_mass=-0.1300g
+  t=345.0s, delta_mass=-0.1310g
+  t=360.0s, delta_mass=-0.1240g
+  t=375.0s, delta_mass=-0.1200g
+  t=390.0s, delta_mass=-0.1200g
+  t=405.0s, delta_mass=-0.1150g
+  t=420.0s, delta_mass=-0.1220g
+  t=435.0s, delta_mass=-0.1060g
+  t=450.0s, delta_mass=-0.0960g
+  t=465.0s, delta_mass=-0.1010g
+  t=480.0s, delta_mass=-0.1180g
+  t=495.0s, delta_mass=-0.0950g
+  t=510.0s, delta_mass=-0.0910g
+  t=525.0s, delta_mass=-0.0950g
+  t=540.0s, delta_mass=-0.0830g
+  t=555.0s, delta_mass=-0.0770g
+  t=570.0s, delta_mass=-0.0730g
+  t=585.0s, delta_mass=-0.0710g
+  t=600.0s, delta_mass=-0.0790g
+  t=615.0s, delta_mass=-0.0760g
+  t=630.0s, delta_mass=-0.0550g
+  t=645.0s, delta_mass=-0.0550g
+  t=660.0s, delta_mass=-0.0630g
+  t=675.0s, delta_mass=-0.0480g
+  t=690.0s, delta_mass=-0.0400g
+  t=705.0s, delta_mass=-0.0410g
+  t=720.0s, delta_mass=-0.0320g
+  t=735.0s, delta_mass=-0.0320g
+  t=750.0s, delta_mass=-0.0290g
+  t=765.0s, delta_mass=-0.0290g
+  t=780.0s, delta_mass=-0.0240g
+  t=795.0s, delta_mass=-0.0300g
+  t=810.0s, delta_mass=-0.0160g
+  t=825.0s, delta_mass=-0.0140g
+  t=840.0s, delta_mass=-0.0190g
+  t=855.0s, delta_mass=-0.0220g
+  t=870.0s, delta_mass=0.0000g
+  t=885.0s, delta_mass=-0.0030g
+  t=900.0s, delta_mass=-0.0060g
+  t=915.0s, delta_mass=0.0020g
+  t=930.0s, delta_mass=0.0070g
+  t=945.0s, delta_mass=0.0100g
+  t=960.0s, delta_mass=0.0130g
+  t=975.0s, delta_mass=0.0180g
+  t=990.0s, delta_mass=0.0200g
+  t=1005.0s, delta_mass=0.0410g
+  t=1020.0s, delta_mass=0.0350g
+  t=1035.0s, delta_mass=0.0280g
+  t=1050.0s, delta_mass=0.0430g
+  t=1065.0s, delta_mass=0.0530g
+  t=1080.0s, delta_mass=0.0530g
+  t=1095.0s, delta_mass=0.0530g
+  t=1110.0s, delta_mass=0.0600g
+  t=1125.0s, delta_mass=0.0660g
+  t=1140.0s, delta_mass=0.0730g
+  t=1155.0s, delta_mass=0.0770g
+  t=1170.0s, delta_mass=0.0730g
+  t=1185.0s, delta_mass=0.0900g
+  t=1200.0s, delta_mass=0.1010g
+  t=1215.0s, delta_mass=0.0920g
+  t=1230.0s, delta_mass=0.0930g
+  t=1245.0s, delta_mass=0.1140g
+  t=1260.0s, delta_mass=0.1110g
+  t=1275.0s, delta_mass=0.1090g
+  t=1290.0s, delta_mass=0.1200g
+  t=1305.0s, delta_mass=0.1280g
+  t=1320.0s, delta_mass=0.1280g
+  t=1335.0s, delta_mass=0.1380g
+  t=1350.0s, delta_mass=0.1330g
+  t=1365.0s, delta_mass=0.1320g
+  t=1380.0s, delta_mass=0.1540g
+  t=1395.0s, delta_mass=0.1530g
+  t=1410.0s, delta_mass=0.1440g
+  t=1425.0s, delta_mass=0.1670g
+  t=1440.0s, delta_mass=0.1740g
+  t=1455.0s, delta_mass=0.1740g
+  t=1470.0s, delta_mass=0.1810g
+  t=1485.0s, delta_mass=0.1910g
+  t=1500.0s, delta_mass=0.1950g
+  t=1515.0s, delta_mass=0.1980g
+  t=1530.0s, delta_mass=0.2000g
+  t=1545.0s, delta_mass=0.2100g
+  t=1560.0s, delta_mass=0.2200g
+  t=1575.0s, delta_mass=0.2220g
+  t=1590.0s, delta_mass=0.2200g
+  t=1605.0s, delta_mass=0.2230g
+  t=1620.0s, delta_mass=0.2410g
+  t=1635.0s, delta_mass=0.2330g
+  t=1650.0s, delta_mass=0.2330g
+  t=1665.0s, delta_mass=0.2500g
+  t=1680.0s, delta_mass=0.2660g
+  t=1695.0s, delta_mass=0.2790g
+  t=1710.0s, delta_mass=0.2810g
+  t=1725.0s, delta_mass=0.2810g
+  t=1740.0s, delta_mass=0.2950g
+  t=1755.0s, delta_mass=0.3060g
+  t=1770.0s, delta_mass=0.2920g
+  t=1785.0s, delta_mass=0.2870g
+  t=1800.0s, delta_mass=0.3090g
+Experiment data saved to drift_corrected_results/250619_drift_corrected_C_16_0_results.csv
+
+Experiment completed successfully!
+Results saved to: drift_corrected_results/250619_drift_corrected_C_16_0_results.csv
+Calculating corrected rates for pump D at flow rate 4.0 µL/s...
+  In pump calibration: 20250609_calibration_D_in_forward_results.csv
+  Out pump calibration: 20250609_calibration_D_out_forward_results.csv
+  In pump gradient: 0.091643 µL/s per 1000 steps/s
+  Out pump gradient: 0.097582 µL/s per 1000 steps/s
+  Naive in pump rate: 43647.8 steps/s
+  Naive out pump rate: 40991.1 steps/s
+  Drift result: 250613_drift_D_4_0_results.csv
+  Drift rate: 0.000099 g/s
+  Drift correction: 1018.5 steps/s
+  Corrected out pump rate: 42009.6 steps/s
+
+Running corrected drift experiment...
+  Duration: 1800 seconds (30 minutes)
+  Output file: drift_corrected_results/250619_drift_corrected_D_4_0_results.csv
+
+Running experiment for 30 minutes...
+  t=0.0s, delta_mass=0.0000g
+  t=15.0s, delta_mass=0.0060g
+  t=30.0s, delta_mass=0.0060g
+  t=45.0s, delta_mass=0.0080g
+  t=60.0s, delta_mass=0.0110g
+  t=75.0s, delta_mass=0.0120g
+  t=90.0s, delta_mass=0.0090g
+  t=105.0s, delta_mass=0.0000g
+  t=120.0s, delta_mass=-0.0050g
+  t=135.0s, delta_mass=-0.0110g
+  t=150.0s, delta_mass=-0.0170g
+  t=165.0s, delta_mass=-0.0220g
+  t=180.0s, delta_mass=-0.0230g
+  t=195.0s, delta_mass=-0.0270g
+  t=210.0s, delta_mass=-0.0260g
+  t=225.0s, delta_mass=-0.0260g
+  t=240.0s, delta_mass=-0.0430g
+  t=255.0s, delta_mass=-0.0460g
+  t=270.0s, delta_mass=-0.0550g
+  t=285.0s, delta_mass=-0.0570g
+  t=300.0s, delta_mass=-0.0540g
+  t=315.0s, delta_mass=-0.0540g
+  t=330.0s, delta_mass=-0.0500g
+  t=345.0s, delta_mass=-0.0670g
+  t=360.0s, delta_mass=-0.0560g
+  t=375.0s, delta_mass=-0.0530g
+  t=390.0s, delta_mass=-0.0550g
+  t=405.0s, delta_mass=-0.0590g
+  t=420.0s, delta_mass=-0.0560g
+  t=435.0s, delta_mass=-0.0560g
+  t=450.0s, delta_mass=-0.0570g
+  t=465.0s, delta_mass=-0.0570g
+  t=480.0s, delta_mass=-0.0570g
+  t=495.0s, delta_mass=-0.0500g
+  t=510.0s, delta_mass=-0.0580g
+  t=525.0s, delta_mass=-0.0600g
+  t=540.0s, delta_mass=-0.0660g
+  t=555.0s, delta_mass=-0.0660g
+  t=570.0s, delta_mass=-0.0650g
+  t=585.0s, delta_mass=-0.0690g
+  t=600.0s, delta_mass=-0.0690g
+  t=615.0s, delta_mass=-0.0740g
+  t=630.0s, delta_mass=-0.0790g
+  t=645.0s, delta_mass=-0.0880g
+  t=660.0s, delta_mass=-0.0950g
+  t=675.0s, delta_mass=-0.0990g
+  t=690.0s, delta_mass=-0.0970g
+  t=705.0s, delta_mass=-0.0920g
+  t=720.0s, delta_mass=-0.0890g
+  t=735.0s, delta_mass=-0.0910g
+  t=750.0s, delta_mass=-0.0970g
+  t=765.0s, delta_mass=-0.1050g
+  t=780.0s, delta_mass=-0.1150g
+  t=795.0s, delta_mass=-0.1190g
+  t=810.0s, delta_mass=-0.1270g
+  t=825.0s, delta_mass=-0.1240g
+  t=840.0s, delta_mass=-0.1220g
+  t=855.0s, delta_mass=-0.1230g
+  t=870.0s, delta_mass=-0.1230g
+  t=885.0s, delta_mass=-0.1220g
+  t=900.0s, delta_mass=-0.1220g
+  t=915.0s, delta_mass=-0.1340g
+  t=930.0s, delta_mass=-0.1370g
+  t=945.0s, delta_mass=-0.1370g
+  t=960.0s, delta_mass=-0.1330g
+  t=975.0s, delta_mass=-0.1350g
+  t=990.0s, delta_mass=-0.1340g
+  t=1005.0s, delta_mass=-0.1370g
+  t=1020.0s, delta_mass=-0.1450g
+  t=1035.0s, delta_mass=-0.1500g
+  t=1050.0s, delta_mass=-0.1610g
+  t=1065.0s, delta_mass=-0.1650g
+  t=1080.0s, delta_mass=-0.1670g
+  t=1095.0s, delta_mass=-0.1650g
+  t=1110.0s, delta_mass=-0.1650g
+  t=1125.0s, delta_mass=-0.1610g
+  t=1140.0s, delta_mass=-0.1590g
+  t=1155.0s, delta_mass=-0.1640g
+  t=1170.0s, delta_mass=-0.1690g
+  t=1185.0s, delta_mass=-0.1800g
+  t=1200.0s, delta_mass=-0.1860g
+  t=1215.0s, delta_mass=-0.1880g
+  t=1230.0s, delta_mass=-0.1920g
+  t=1245.0s, delta_mass=-0.1920g
+  t=1260.0s, delta_mass=-0.1930g
+  t=1275.0s, delta_mass=-0.1930g
+  t=1290.0s, delta_mass=-0.2010g
+  t=1305.0s, delta_mass=-0.2140g
+  t=1320.0s, delta_mass=-0.2230g
+  t=1335.0s, delta_mass=-0.2320g
+  t=1350.0s, delta_mass=-0.2350g
+  t=1365.0s, delta_mass=-0.2360g
+  t=1380.0s, delta_mass=-0.2370g
+  t=1395.0s, delta_mass=-0.2400g
+  t=1410.0s, delta_mass=-0.2430g
+  t=1425.0s, delta_mass=-0.2460g
+  t=1440.0s, delta_mass=-0.2520g
+  t=1455.0s, delta_mass=-0.2540g
+  t=1470.0s, delta_mass=-0.2540g
+  t=1485.0s, delta_mass=-0.2530g
+  t=1500.0s, delta_mass=-0.2530g
+  t=1515.0s, delta_mass=-0.2500g
+  t=1530.0s, delta_mass=-0.2510g
+  t=1545.0s, delta_mass=-0.2520g
+  t=1560.0s, delta_mass=-0.2590g
+  t=1575.0s, delta_mass=-0.2680g
+  t=1590.0s, delta_mass=-0.2760g
+  t=1605.0s, delta_mass=-0.2770g
+  t=1620.0s, delta_mass=-0.2790g
+  t=1635.0s, delta_mass=-0.2760g
+  t=1650.0s, delta_mass=-0.2750g
+  t=1665.0s, delta_mass=-0.2750g
+  t=1680.0s, delta_mass=-0.2790g
+  t=1695.0s, delta_mass=-0.2860g
+  t=1710.0s, delta_mass=-0.2940g
+  t=1725.0s, delta_mass=-0.3030g
+  t=1740.0s, delta_mass=-0.3050g
+  t=1755.0s, delta_mass=-0.3090g
+  t=1770.0s, delta_mass=-0.3120g
+  t=1785.0s, delta_mass=-0.3120g
+  t=1800.0s, delta_mass=-0.3150g
+Experiment data saved to drift_corrected_results/250619_drift_corrected_D_4_0_results.csv
+
+Experiment completed successfully!
+Results saved to: drift_corrected_results/250619_drift_corrected_D_4_0_results.csv
