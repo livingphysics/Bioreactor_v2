@@ -1,3 +1,9 @@
+"""
+python -m calibration_code.run_binary
+
+This script runs a binary search for the optimal out pump rate for a given in pump rate.
+"""
+
 import sys
 import os
 from datetime import datetime
@@ -33,10 +39,10 @@ def run_binary(letter, steps_rate):
     # 2. Adjust out pump rate until sign change
     direction = 1 if delta_mass > 0 else -1 if delta_mass < 0 else 0
     if direction == 0:
-        out_rates = [out_rate + 5, out_rate - 5]
+        out_rates = [out_rate + 1000, out_rate - 1000]
     else:
         while True:
-            out_rate += 10 * direction
+            out_rate += 1000 * direction
             print(f"Testing out pump at {out_rate} (in at {in_rate})...")
             data = run_drift(in_pump, in_rate, out_pump, out_rate, duration=900, measurement_times=meas_times, csv_output_path=None, log_progress=True)
             masses = [row[1] for row in data]
@@ -46,7 +52,7 @@ def run_binary(letter, steps_rate):
             print(f"Δmass (end-3min) = {delta_mass_new:.4f}g")
             if (direction > 0 and delta_mass_new < 0) or (direction < 0 and delta_mass_new > 0):
                 # Crossed zero
-                out_rates = [out_rate - 10 * direction, out_rate]
+                out_rates = [out_rate - 1000 * direction, out_rate]
                 break
     # 3. Binary search
     print(f"Starting binary search between {out_rates[0]} and {out_rates[1]}...")
@@ -90,16 +96,32 @@ def run_binary(letter, steps_rate):
     print(f"Drift results saved to {drift_csv}")
 
 def main():
-    if len(sys.argv) != 3:
-        print(f"Usage: python {sys.argv[0]} <letter> <steps_rate>")
-        sys.exit(1)
-    letter = sys.argv[1].upper()
-    try:
-        steps_rate = int(sys.argv[2])
-    except ValueError:
-        print("steps_rate must be an integer")
-        sys.exit(1)
-    run_binary(letter, steps_rate)
+    # Define the list of experiments as tuples (letter, steps_rate)
+    experiments = [
+        ('A', 148802),
+        ('B', 64263),
+        ('C', 174417),
+        ('D', 43647)
+    ]
+    
+    print(f"Running {len(experiments)} binary search experiments...")
+    
+    for i, (letter, steps_rate) in enumerate(experiments, 1):
+        print(f"\n{'='*50}")
+        print(f"Experiment {i}/{len(experiments)}: Pump {letter} at {steps_rate} steps/s")
+        print(f"{'='*50}")
+        
+        try:
+            run_binary(letter, steps_rate)
+            print(f"Experiment {i} completed successfully!")
+        except Exception as e:
+            print(f"Error in experiment {i} (Pump {letter}, {steps_rate} steps/s): {e}")
+            print("Continuing with next experiment...")
+            continue
+    
+    print(f"\n{'='*50}")
+    print(f"All experiments completed!")
+    print(f"{'='*50}")
 
 if __name__ == "__main__":
     main() 
