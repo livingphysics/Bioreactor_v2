@@ -6,12 +6,12 @@ Shared utilities for pump control, mass measurement, experiment timing, CSV logg
 import os
 import re
 import time
-import serial
+# import serial
 import numpy as np
 import pandas as pd
 from math import floor
 from datetime import datetime
-from ticlib import TicUSB
+# from ticlib import TicUSB
 from sklearn.linear_model import LinearRegression
 from scipy.stats import t
 import matplotlib.pyplot as plt
@@ -81,8 +81,6 @@ def run_drift(in_pump_serial, in_steps_rate, out_pump_serial, out_steps_rate, du
     If measurement_times is a list, measure at those times (in seconds, e.g., [0, 180, 900] for binary drift).
     Returns: list of (time, delta_mass)
     """
-    if csv_output_path is None:
-        raise ValueError("csv_output_path must be provided")
     if measurement_times is None:
         # Drift mode: measure every 15s
         measurement_times = list(range(0, duration+1, 15))
@@ -126,11 +124,12 @@ def run_drift(in_pump_serial, in_steps_rate, out_pump_serial, out_steps_rate, du
             t_exp += time.time() - t_measurement_start
             stop_pump(in_pump)
             stop_pump(out_pump)
-    # Write to CSV
-    df = pd.DataFrame(data_rows, columns=["time_s", "delta_mass_g"])
-    df.to_csv(csv_output_path, index=False)
-    if log_progress:
-        print(f"Experiment data saved to {csv_output_path}")
+    # Write to CSV if path provided
+    if csv_output_path is not None:
+        df = pd.DataFrame(data_rows, columns=["time_s", "delta_mass_g"])
+        df.to_csv(csv_output_path, index=False)
+        if log_progress:
+            print(f"Experiment data saved to {csv_output_path}")
     return data_rows
 
 # --- CSV/Batch utilities ---
