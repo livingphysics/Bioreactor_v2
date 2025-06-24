@@ -6,6 +6,7 @@ This script runs a binary search for the optimal out pump rate for a given in pu
 
 import sys
 import os
+import time
 from datetime import datetime
 from src.config import Config as cfg
 from calibration_code.calibration_utils import run_drift, log_to_csv
@@ -112,8 +113,14 @@ def main():
         print(f"{'='*50}")
         
         try:
+            start_time = time.time()
             run_binary(letter, steps_rate)
-            print(f"Experiment {i} completed successfully!")
+            end_time = time.time()
+            elapsed_seconds = end_time - start_time
+            hours = int(elapsed_seconds // 3600)
+            minutes = int((elapsed_seconds % 3600) // 60)
+            seconds = (elapsed_seconds % 3600) % 60
+            print(f"Experiment {i} completed successfully in {hours}h {minutes}m {seconds:.1f}s!")
         except Exception as e:
             print(f"Error in experiment {i} (Pump {letter}, {steps_rate} steps/s): {e}")
             print("Continuing with next experiment...")
