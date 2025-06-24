@@ -56,7 +56,7 @@ def run_binary(letter, steps_rate):
                 break
     # 3. Binary search
     print(f"Starting binary search between {out_rates[0]} and {out_rates[1]}...")
-    tol = 0.02
+    tol = 0.005
     low, high = min(out_rates), max(out_rates)
     best_out_rate = None
     best_delta = None
