@@ -1,12 +1,14 @@
 """
-python -m calibration_code.run_binary
+python -m calibration_code.run_binary <letter> <steps_rate>
 
 This script runs a binary search for the optimal out pump rate for a given in pump rate.
+Usage: python -m calibration_code.run_binary A 148802
 """
 
 import sys
 import os
 import time
+import argparse
 from datetime import datetime
 from src.config import Config as cfg
 from calibration_code.calibration_utils import run_drift, log_to_csv
@@ -35,7 +37,7 @@ def run_binary(letter, steps_rate):
     masses = [row[1] for row in data]
     initial_mass, mass_3min, end_mass = masses[0], masses[1], masses[2]
     delta_mass = end_mass - mass_3min
-    search_rows.append([in_rate, out_rate, initial_mass, mass_3min, end_mass, delta_mass])
+    search_rows.append([out_rate, in_rate, initial_mass, mass_3min, end_mass, delta_mass])
     print(f"Initial: Δmass (end-3min) = {delta_mass:.4f}g")
     # 2. Adjust out pump rate until sign change
     direction = 1 if delta_mass > 0 else -1 if delta_mass < 0 else 0
@@ -49,7 +51,7 @@ def run_binary(letter, steps_rate):
             masses = [row[1] for row in data]
             initial_mass, mass_3min, end_mass = masses[0], masses[1], masses[2]
             delta_mass_new = end_mass - mass_3min
-            search_rows.append([in_rate, out_rate, initial_mass, mass_3min, end_mass, delta_mass_new])
+            search_rows.append([out_rate, in_rate, initial_mass, mass_3min, end_mass, delta_mass_new])
             print(f"Δmass (end-3min) = {delta_mass_new:.4f}g")
             if (direction > 0 and delta_mass_new < 0) or (direction < 0 and delta_mass_new > 0):
                 # Crossed zero
@@ -68,7 +70,7 @@ def run_binary(letter, steps_rate):
         masses = [row[1] for row in data]
         initial_mass, mass_3min, end_mass = masses[0], masses[1], masses[2]
         delta_mass = end_mass - mass_3min
-        search_rows.append([in_rate, mid, initial_mass, mass_3min, end_mass, delta_mass])
+        search_rows.append([mid, in_rate, initial_mass, mass_3min, end_mass, delta_mass])
         print(f"Δmass (end-3min) = {delta_mass:.4f}g")
         if abs(delta_mass) <= tol:
             best_out_rate = mid
@@ -80,13 +82,13 @@ def run_binary(letter, steps_rate):
             high = mid - 1
     if best_out_rate is None:
         # Pick the closest
-        diffs = [(abs(row[5]), row[1]) for row in search_rows if row[1] >= min(out_rates) and row[1] <= max(out_rates)]
+        diffs = [(abs(row[5]), row[0]) for row in search_rows if row[0] >= min(out_rates) and row[0] <= max(out_rates)]
         diffs.sort()
         best_out_rate = diffs[0][1]
-        best_delta = [row[5] for row in search_rows if row[1] == best_out_rate][0]
+        best_delta = [row[5] for row in search_rows if row[0] == best_out_rate][0]
     print(f"Best out pump rate: {best_out_rate} (Δmass={best_delta:.4f}g)")
     # 4. Save binary search results
-    search_cols = ['in_pump_steps_rate', 'out_pump_steps_rate', 'initial_mass', 'mass_3min', 'end_mass', 'delta_mass_end_minus_3min']
+    search_cols = ['out_pump_steps_rate', 'in_pump_steps_rate', 'initial_mass', 'mass_3min', 'end_mass', 'delta_mass_end_minus_3min']
     search_csv = os.path.join(BINARY_SEARCH_DIR, f"{date_str}_binary_search_{letter}_{steps_rate}_results.csv")
     log_to_csv(search_rows, search_cols, search_csv)
     print(f"Binary search results saved to {search_csv}")
@@ -97,38 +99,40 @@ def run_binary(letter, steps_rate):
     print(f"Drift results saved to {drift_csv}")
 
 def main():
-    # Define the list of experiments as tuples (letter, steps_rate)
-    experiments = [
-        ('A', 148802),
-        ('B', 64263),
-        ('C', 174417),
-        ('D', 43647)
-    ]
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Run binary search for optimal out pump rate')
+    parser.add_argument('letter', type=str, help='Pump letter (A, B, C, D)')
+    parser.add_argument('steps_rate', type=int, help='Steps per second rate')
     
-    print(f"Running {len(experiments)} binary search experiments...")
+    args = parser.parse_args()
     
-    for i, (letter, steps_rate) in enumerate(experiments, 1):
-        print(f"\n{'='*50}")
-        print(f"Experiment {i}/{len(experiments)}: Pump {letter} at {steps_rate} steps/s")
-        print(f"{'='*50}")
-        
-        try:
-            start_time = time.time()
-            run_binary(letter, steps_rate)
-            end_time = time.time()
-            elapsed_seconds = end_time - start_time
-            hours = int(elapsed_seconds // 3600)
-            minutes = int((elapsed_seconds % 3600) // 60)
-            seconds = (elapsed_seconds % 3600) % 60
-            print(f"Experiment {i} completed successfully in {hours}h {minutes}m {seconds:.1f}s!")
-        except Exception as e:
-            print(f"Error in experiment {i} (Pump {letter}, {steps_rate} steps/s): {e}")
-            print("Continuing with next experiment...")
-            continue
+    letter = args.letter.upper()
+    steps_rate = args.steps_rate
     
-    print(f"\n{'='*50}")
-    print(f"All experiments completed!")
+    # Validate inputs
+    if letter not in ['A', 'B', 'C', 'D']:
+        print(f"Error: Letter must be A, B, C, or D. Got: {letter}")
+        sys.exit(1)
+    
+    if steps_rate <= 0:
+        print(f"Error: Steps rate must be positive. Got: {steps_rate}")
+        sys.exit(1)
+    
+    print(f"Running binary search experiment: Pump {letter} at {steps_rate} steps/s")
     print(f"{'='*50}")
+    
+    try:
+        start_time = time.time()
+        run_binary(letter, steps_rate)
+        end_time = time.time()
+        elapsed_seconds = end_time - start_time
+        hours = int(elapsed_seconds // 3600)
+        minutes = int((elapsed_seconds % 3600) // 60)
+        seconds = (elapsed_seconds % 3600) % 60
+        print(f"Experiment completed successfully in {hours}h {minutes}m {seconds:.1f}s!")
+    except Exception as e:
+        print(f"Error in experiment (Pump {letter}, {steps_rate} steps/s): {e}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main() 

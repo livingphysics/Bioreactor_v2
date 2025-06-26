@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV File Browser and Plotter</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .sidebar {
+            width: 400px;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .main-content {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .tree-item {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .tree-item:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .tree-item.directory {
+            font-weight: bold;
+            color: #2c5aa0;
+        }
+        
+        .tree-item.file {
+            color: #333;
+            margin-left: 20px;
+        }
+        
+        .tree-item.selected {
+            background-color: #e3f2fd;
+        }
+        
+        .tree-children {
+            margin-left: 20px;
+            display: none;
+        }
+        
+        .tree-children.expanded {
+            display: block;
+        }
+        
+        .checkbox {
+            margin-right: 8px;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        button {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 5px;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background-color: #1976D2;
+        }
+        
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .error {
+            color: #f44336;
+            background-color: #ffebee;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+        
+        #plot-container {
+            min-height: 500px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+        }
+        
+        .file-count {
+            color: #666;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>CSV File Browser and Plotter</h1>
+    
+    <div class="container">
+        <div class="sidebar">
+            <h3>File Browser</h3>
+            <div id="file-tree">
+                <div class="loading">Loading file tree...</div>
+            </div>
+            <div class="file-count" id="file-count">0 files selected</div>
+        </div>
+        
+        <div class="main-content">
+            <h3>Plot Area</h3>
+            <div class="controls">
+                <button id="plot-btn" onclick="plotSelectedFiles()" disabled>Plot Selected Files</button>
+                <button id="clear-btn" onclick="clearPlot()">Clear Plot</button>
+            </div>
+            <div id="error-message"></div>
+            <div id="plot-container">
+                <div class="loading">Select CSV files and click "Plot Selected Files" to generate a plot</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFiles = new Set();
+        let treeData = null;
+
+        // Load file tree on page load
+        window.onload = function() {
+            loadFileTree();
+        };
+
+        async function loadFileTree() {
+            try {
+                const response = await fetch('/api/files');
+                const result = await response.json();
+                
+                if (result.success) {
+                    treeData = result.data;
+                    renderFileTree(treeData);
+                } else {
+                    showError('Failed to load file tree: ' + result.error);
+                }
+            } catch (error) {
+                showError('Error loading file tree: ' + error.message);
+            }
+        }
+
+        function renderFileTree(data, parentElement = null) {
+            const container = parentElement || document.getElementById('file-tree');
+            if (!parentElement) {
+                container.innerHTML = '';
+            }
+
+            data.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `tree-item ${item.type}`;
+                
+                if (item.type === 'directory') {
+                    itemDiv.innerHTML = `
+                        <span onclick="toggleDirectory(this)" style="cursor: pointer;">📁 ${item.name}</span>
+                        <div class="tree-children"></div>
+                    `;
+                    container.appendChild(itemDiv);
+                    
+                    if (item.children && item.children.length > 0) {
+                        renderFileTree(item.children, itemDiv.querySelector('.tree-children'));
+                    }
+                } else {
+                    itemDiv.innerHTML = `
+                        <input type="checkbox" class="checkbox" onchange="toggleFileSelection('${item.path}', this.checked)">
+                        <span>📄 ${item.name}</span>
+                    `;
+                    container.appendChild(itemDiv);
+                }
+            });
+        }
+
+        function toggleDirectory(element) {
+            const children = element.nextElementSibling;
+            children.classList.toggle('expanded');
+        }
+
+        function toggleFileSelection(filePath, isSelected) {
+            if (isSelected) {
+                selectedFiles.add(filePath);
+            } else {
+                selectedFiles.delete(filePath);
+            }
+            
+            updateFileCount();
+            updatePlotButton();
+        }
+
+        function updateFileCount() {
+            const countElement = document.getElementById('file-count');
+            countElement.textContent = `${selectedFiles.size} file(s) selected`;
+        }
+
+        function updatePlotButton() {
+            const plotBtn = document.getElementById('plot-btn');
+            plotBtn.disabled = selectedFiles.size === 0;
+        }
+
+        async function plotSelectedFiles() {
+            if (selectedFiles.size === 0) {
+                showError('No files selected');
+                return;
+            }
+
+            const plotContainer = document.getElementById('plot-container');
+            plotContainer.innerHTML = '<div class="loading">Generating plot...</div>';
+            clearError();
+
+            try {
+                const response = await fetch('/api/plot', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        files: Array.from(selectedFiles)
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    Plotly.newPlot('plot-container', result.data.data, result.data.layout);
+                } else {
+                    showError('Failed to generate plot: ' + result.error);
+                    plotContainer.innerHTML = '<div class="loading">Select CSV files and click "Plot Selected Files" to generate a plot</div>';
+                }
+            } catch (error) {
+                showError('Error generating plot: ' + error.message);
+                plotContainer.innerHTML = '<div class="loading">Select CSV files and click "Plot Selected Files" to generate a plot</div>';
+            }
+        }
+
+        function clearPlot() {
+            const plotContainer = document.getElementById('plot-container');
+            plotContainer.innerHTML = '<div class="loading">Select CSV files and click "Plot Selected Files" to generate a plot</div>';
+            clearError();
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.innerHTML = `<div class="error">${message}</div>`;
+        }
+
+        function clearError() {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.innerHTML = '';
+        }
+    </script>
+</body>
+</html> 
