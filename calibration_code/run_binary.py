@@ -22,6 +22,16 @@ BINARY_SEARCH_DIR = 'binary_search_results'
 BINARY_DRIFT_DIR = 'binary_drift_results'
 
 
+def format_flow_rate_for_filename(flow_rate):
+    """
+    Format flow rate for filename: 20 or 20.0 -> 20_0, 14.5 -> 14_5
+    """
+    # Convert to string with one decimal place
+    formatted = f"{flow_rate:.1f}"
+    # Replace decimal point with underscore
+    return formatted.replace('.', '_')
+
+
 def get_most_recent_calibration(letter, pump_type):
     """
     Find the most recent calibration file for a given letter and pump type (in/out).
@@ -174,9 +184,10 @@ def run_binary(letter, rate, mode='steps'):
     # 4. Save binary search results
     search_cols = ['out_pump_steps_rate', 'in_pump_steps_rate', 'initial_mass', 'mass_3min', 'end_mass', 'delta_mass_end_minus_3min']
     
-    # Create filename based on mode
+    # Create filename based on mode with proper formatting
     if mode == 'flow':
-        search_csv = os.path.join(BINARY_SEARCH_DIR, f"{date_str}_binary_search_{letter}_flow_{rate}_results.csv")
+        flow_rate_formatted = format_flow_rate_for_filename(rate)
+        search_csv = os.path.join(BINARY_SEARCH_DIR, f"{date_str}_binary_search_{letter}_flow_{flow_rate_formatted}_results.csv")
     else:
         search_csv = os.path.join(BINARY_SEARCH_DIR, f"{date_str}_binary_search_{letter}_{rate}_results.csv")
     

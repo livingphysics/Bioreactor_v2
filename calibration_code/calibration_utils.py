@@ -6,12 +6,12 @@ Shared utilities for pump control, mass measurement, experiment timing, CSV logg
 import os
 import re
 import time
-# import serial
+import serial
 import numpy as np
 import pandas as pd
 from math import floor
 from datetime import datetime
-# from ticlib import TicUSB
+from ticlib import TicUSB
 from sklearn.linear_model import LinearRegression
 from scipy.stats import t
 import matplotlib.pyplot as plt
