@@ -41,7 +41,7 @@ def main():
                 x = df['time_s'].values
                 y = df['delta_mass_g'].values
                 label = f"{letter}, {steps_rate} (file: {os.path.basename(path)})"
-                plot_with_fit_and_bands(x, y, ax=ax, label=label, show_title=False)
+                plot_with_fit_and_bands(x, y, ax=ax, label=label, show_title=False, show_stats_table=False)
             else:
                 print(f"No data for {letter} at {steps_rate}")
         ax.set_title("Binary Drift Results (Combined)")
@@ -62,7 +62,7 @@ def main():
                 x = df['time_s'].values
                 y = df['delta_mass_g'].values
                 label = f"{letter}, {steps_rate}"
-                plot_with_fit_and_bands(x, y, ax=ax, label=label, show_title=True)
+                plot_with_fit_and_bands(x, y, ax=ax, label=label, show_title=True, show_stats_table=False)
             else:
                 ax.text(0.5, 0.5, f"No data for {letter}, {steps_rate}", ha='center', va='center')
             ax.set_title(f"{letter}, {steps_rate}")

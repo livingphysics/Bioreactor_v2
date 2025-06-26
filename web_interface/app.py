@@ -50,8 +50,12 @@ def generate_plot():
                 return jsonify({'success': False, 'error': f'File not found: {file_path}'}), 404
             absolute_paths.append(absolute_path)
         
-        plot_data = plot_csv_files(absolute_paths)
-        return jsonify({'success': True, 'data': plot_data})
+        result = plot_csv_files(absolute_paths)
+        return jsonify({
+            'success': True, 
+            'data': result['plot_data'],
+            'statistics': result['statistics']
+        })
     
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500

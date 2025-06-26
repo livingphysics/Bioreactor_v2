@@ -50,11 +50,12 @@ def read_csv_file(file_path: str) -> tuple:
 def generate_plot_data(file_paths: list) -> dict:
     """
     Generate plot data for multiple CSV files.
-    Returns Plotly-compatible data structure.
+    Returns Plotly-compatible data structure with statistics.
     """
     colors = ['blue', 'red', 'green', 'orange', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan']
     
     fig = go.Figure()
+    statistics = []  # List to store statistics for each file
     
     for i, file_path in enumerate(file_paths):
         try:
@@ -62,6 +63,17 @@ def generate_plot_data(file_paths: list) -> dict:
             
             # Get fitting statistics
             gradient, intercept, r2, rmse, model = get_fit_stats(x_data, y_data)
+            
+            # Store statistics for this file
+            file_stats = {
+                'filename': filename,
+                'gradient': gradient,
+                'intercept': intercept,
+                'r2': r2,
+                'rmse': rmse,
+                'num_points': len(x_data)
+            }
+            statistics.append(file_stats)
             
             # Generate x grid for smooth line
             x_grid = np.linspace(np.min(x_data), np.max(x_data), 200)
@@ -125,6 +137,17 @@ def generate_plot_data(file_paths: list) -> dict:
                 marker=dict(color='red', size=10, symbol='x'),
                 showlegend=True
             ))
+            
+            # Add error statistics
+            statistics.append({
+                'filename': os.path.basename(file_path),
+                'error': str(e),
+                'gradient': None,
+                'intercept': None,
+                'r2': None,
+                'rmse': None,
+                'num_points': None
+            })
     
     # Update layout
     fig.update_layout(
@@ -135,12 +158,15 @@ def generate_plot_data(file_paths: list) -> dict:
         template='plotly_white'
     )
     
-    return fig.to_dict()
+    return {
+        'plot_data': fig.to_dict(),
+        'statistics': statistics
+    }
 
 def plot_csv_files(file_paths: list) -> dict:
     """
     Main function to plot multiple CSV files.
-    Returns Plotly figure data.
+    Returns Plotly figure data and statistics.
     """
     if not file_paths:
         raise ValueError("No file paths provided")

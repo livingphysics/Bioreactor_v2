@@ -6,12 +6,12 @@ Shared utilities for pump control, mass measurement, experiment timing, CSV logg
 import os
 import re
 import time
-import serial
+# import serial
 import numpy as np
 import pandas as pd
 from math import floor
 from datetime import datetime
-from ticlib import TicUSB
+# from ticlib import TicUSB
 from sklearn.linear_model import LinearRegression
 from scipy.stats import t
 import matplotlib.pyplot as plt
@@ -50,28 +50,27 @@ def parse_weight(s: str) -> float:
 
 def read_stable_weight():
     """Read a stable weight from the scale, waiting for two consecutive readings within tolerance."""
-    ser = serial.Serial(port=SERIAL_PORT_SCALE,
-                        baudrate=BAUDRATE,
-                        bytesize=serial.EIGHTBITS,
-                        parity=serial.PARITY_NONE,
-                        stopbits=serial.STOPBITS_ONE,
-                        timeout=READ_TIMEOUT)
     prev = None
     while True:
-        ser.write(b'w')
-        raw = ser.read(18)
         try:
-            text = raw.decode('ascii', errors='ignore')
-        except:
+            with serial.Serial(port=SERIAL_PORT_SCALE,
+                              baudrate=BAUDRATE,
+                              bytesize=serial.EIGHTBITS,
+                              parity=serial.PARITY_NONE,
+                              stopbits=serial.STOPBITS_ONE,
+                              timeout=READ_TIMEOUT) as ser:
+                ser.write(b'w')
+                raw = ser.read(18)
+                text = raw.decode('ascii', errors='ignore')
+                w = parse_weight(text)
+                if w is not None:
+                    if prev is not None and abs(w - prev) < TOLERANCE:
+                        return w
+                    prev = w
+        except (serial.SerialException, OSError) as e:
+            print(f"Serial connection error: {e}")
+            time.sleep(1.0)  # Wait before retrying
             continue
-        w = parse_weight(text)
-        if w is None:
-            continue
-        if prev is not None and abs(w - prev) < TOLERANCE:
-            ser.close()
-            del ser
-            return w
-        prev = w
         time.sleep(3.0)
 
 # --- Experiment running utilities ---
@@ -99,31 +98,69 @@ def run_drift(in_pump_serial, in_steps_rate, out_pump_serial, out_steps_rate, du
     initial_mass = read_stable_weight()
     t_exp = 0.0
     next_measure_idx = 0
-    while t_exp < duration or next_measure_idx < len(measurement_times):
-        # If it's time for a measurement
-        if next_measure_idx < len(measurement_times) and t_exp >= measurement_times[next_measure_idx]:
-            mass = read_stable_weight()
-            delta_mass = mass - initial_mass
-            data_rows.append((t_exp, delta_mass))
-            if log_progress:
-                print(f"  t={t_exp:.1f}s, delta_mass={delta_mass:.4f}g")
-            next_measure_idx += 1
-        # If experiment is done
-        if t_exp >= duration:
-            break
-        # Run pumps until next measurement or end
-        next_time = measurement_times[next_measure_idx] if next_measure_idx < len(measurement_times) else duration
-        run_time = min(next_time - t_exp, duration - t_exp)
-        if run_time > 0:
-            in_pump = init_pump(in_pump_serial)
-            out_pump = init_pump(out_pump_serial)
-            t_measurement_start = time.time()
-            while time.time() - t_measurement_start <= run_time:
-                in_pump.set_target_velocity(in_velocity)
-                out_pump.set_target_velocity(out_velocity)
-            t_exp += time.time() - t_measurement_start
-            stop_pump(in_pump)
-            stop_pump(out_pump)
+    
+    # Initialize pump variables for cleanup
+    in_pump = None
+    out_pump = None
+    
+    try:
+        while t_exp < duration or next_measure_idx < len(measurement_times):
+            # If it's time for a measurement
+            if next_measure_idx < len(measurement_times) and t_exp >= measurement_times[next_measure_idx]:
+                mass = read_stable_weight()
+                delta_mass = mass - initial_mass
+                data_rows.append((t_exp, delta_mass))
+                if log_progress:
+                    print(f"  t={t_exp:.1f}s, delta_mass={delta_mass:.4f}g")
+                next_measure_idx += 1
+            # If experiment is done
+            if t_exp >= duration:
+                break
+            # Run pumps until next measurement or end
+            next_time = measurement_times[next_measure_idx] if next_measure_idx < len(measurement_times) else duration
+            run_time = min(next_time - t_exp, duration - t_exp)
+            if run_time > 0:
+                # Initialize pumps with timeout handling
+                try:
+                    in_pump = init_pump(in_pump_serial)
+                    out_pump = init_pump(out_pump_serial)
+                except Exception as e:
+                    print(f"Failed to initialize pumps: {e}")
+                    raise
+                
+                t_measurement_start = time.time()
+                while time.time() - t_measurement_start <= run_time:
+                    try:
+                        in_pump.set_target_velocity(in_velocity)
+                        out_pump.set_target_velocity(out_velocity)
+                    except Exception as e:
+                        print(f"Pump control error: {e}")
+                        raise
+                t_exp += time.time() - t_measurement_start
+                
+                # Clean up pumps after each run
+                if in_pump:
+                    stop_pump(in_pump)
+                    in_pump = None
+                if out_pump:
+                    stop_pump(out_pump)
+                    out_pump = None
+    except Exception as e:
+        print(f"Experiment error: {e}")
+        raise
+    finally:
+        # Ensure pumps are cleaned up even if an exception occurs
+        if in_pump:
+            try:
+                stop_pump(in_pump)
+            except Exception as e:
+                print(f"Error cleaning up in_pump: {e}")
+        if out_pump:
+            try:
+                stop_pump(out_pump)
+            except Exception as e:
+                print(f"Error cleaning up out_pump: {e}")
+    
     # Write to CSV if path provided
     if csv_output_path is not None:
         df = pd.DataFrame(data_rows, columns=["time_s", "delta_mass_g"])
@@ -213,7 +250,7 @@ def calculate_heteroskedastic_band(x, y, model, x_grid, n_boot=2000):
     band_low, band_high = np.percentile(y_boot, [2.5, 97.5], axis=0)
     return band_low, band_high
 
-def plot_with_fit_and_bands(x, y, ax=None, label=None, color='b', show_title=True):
+def plot_with_fit_and_bands(x, y, ax=None, label=None, color='b', show_title=True, show_stats_table=True):
     """Plot data, fit line, and both error bands. Flexible for drift and binary drift."""
     gradient, intercept, r2, rmse, model = get_fit_stats(x, y)
     x_grid = np.linspace(np.min(x), np.max(x), 200)
@@ -222,7 +259,7 @@ def plot_with_fit_and_bands(x, y, ax=None, label=None, color='b', show_title=Tru
     low, high = calculate_homoskedastic_band(np.array(x), np.array(y), model, x_grid)
     created_ax = False
     if ax is None:
-        fig, ax = plt.subplots(figsize=(10, 6))
+        fig, ax = plt.subplots(figsize=(10, 8))  # Increased height for table
         created_ax = True
     base_color = mcolors.to_rgb(color)
     light_color = tuple(0.6 + 0.4 * c for c in base_color)
@@ -239,6 +276,46 @@ def plot_with_fit_and_bands(x, y, ax=None, label=None, color='b', show_title=Tru
     ax.grid(True)
     if label or not show_title:
         ax.legend()
+    
+    # Add statistics table if requested
+    if show_stats_table and created_ax:
+        # Create table data
+        table_data = [
+            ['Gradient', f'{gradient:.15f}'],
+            ['Intercept', f'{intercept:.8f}'],
+            ['R²', f'{r2:.4f}'],
+            ['RMSE', f'{rmse:.6f}'],
+            ['Data Points', f'{len(x)}']
+        ]
+        
+        # Create table
+        table = ax.table(cellText=table_data,
+                        colLabels=['Statistic', 'Value'],
+                        cellLoc='left',
+                        loc='bottom',
+                        bbox=[0, -0.3, 1, 0.2])  # Position below plot
+        
+        # Style the table
+        table.auto_set_font_size(False)
+        table.set_fontsize(9)
+        table.scale(1, 1.5)
+        
+        # Style header row
+        for i in range(2):
+            table[(0, i)].set_facecolor('#2196F3')
+            table[(0, i)].set_text_props(weight='bold', color='white')
+        
+        # Style data rows
+        for i in range(1, len(table_data) + 1):
+            for j in range(2):
+                if i % 2 == 0:
+                    table[(i, j)].set_facecolor('#f2f2f2')
+                else:
+                    table[(i, j)].set_facecolor('white')
+        
+        # Adjust layout to accommodate table
+        plt.subplots_adjust(bottom=0.25)
+    
     if created_ax:
         plt.tight_layout()
         plt.show() 

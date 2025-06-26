@@ -134,6 +134,57 @@
             font-size: 12px;
             margin-top: 10px;
         }
+        
+        #statistics-container {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        
+        .statistics-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background-color: white;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .statistics-table th,
+        .statistics-table td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .statistics-table th {
+            background-color: #2196F3;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .statistics-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .statistics-table tr:hover {
+            background-color: #e3f2fd;
+        }
+        
+        .error-row {
+            background-color: #ffebee !important;
+            color: #c62828;
+        }
+        
+        .no-data {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 20px;
+        }
     </style>
 </head>
 <body>
@@ -157,6 +208,12 @@
             <div id="error-message"></div>
             <div id="plot-container">
                 <div class="loading">Select CSV files and click "Plot Selected Files" to generate a plot</div>
+            </div>
+            <div id="statistics-container" style="display: none;">
+                <h4>Fitting Statistics</h4>
+                <div id="statistics-table-container">
+                    <div class="no-data">No statistics available</div>
+                </div>
             </div>
         </div>
     </div>
@@ -264,9 +321,13 @@
                 });
 
                 const result = await response.json();
+                console.log('Received result from server:', result);
                 
                 if (result.success) {
+                    console.log('Plot data:', result.data);
+                    console.log('Statistics data:', result.statistics);
                     Plotly.newPlot('plot-container', result.data.data, result.data.layout);
+                    updateStatistics(result.statistics);
                 } else {
                     showError('Failed to generate plot: ' + result.error);
                     plotContainer.innerHTML = '<div class="loading">Select CSV files and click "Plot Selected Files" to generate a plot</div>';
@@ -280,6 +341,8 @@
         function clearPlot() {
             const plotContainer = document.getElementById('plot-container');
             plotContainer.innerHTML = '<div class="loading">Select CSV files and click "Plot Selected Files" to generate a plot</div>';
+            const statsContainer = document.getElementById('statistics-container');
+            statsContainer.style.display = 'none';
             clearError();
         }
 
@@ -291,6 +354,71 @@
         function clearError() {
             const errorDiv = document.getElementById('error-message');
             errorDiv.innerHTML = '';
+        }
+
+        function updateStatistics(statistics) {
+            console.log('updateStatistics called with:', statistics);
+            const statsContainer = document.getElementById('statistics-container');
+            const tableContainer = document.getElementById('statistics-table-container');
+            
+            if (!statistics || statistics.length === 0) {
+                console.log('No statistics data, hiding container');
+                tableContainer.innerHTML = '<div class="no-data">No statistics available</div>';
+                statsContainer.style.display = 'none';
+                return;
+            }
+            
+            console.log('Creating table with', statistics.length, 'statistics');
+            
+            // Create table
+            let tableHTML = `
+                <table class="statistics-table">
+                    <thead>
+                        <tr>
+                            <th>Filename</th>
+                            <th>Gradient</th>
+                            <th>Intercept</th>
+                            <th>R²</th>
+                            <th>RMSE</th>
+                            <th>Data Points</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            statistics.forEach((stat, index) => {
+                console.log('Processing stat', index, ':', stat);
+                if (stat.error) {
+                    // Error row
+                    tableHTML += `
+                        <tr class="error-row">
+                            <td>${stat.filename}</td>
+                            <td colspan="5">Error: ${stat.error}</td>
+                        </tr>
+                    `;
+                } else {
+                    // Normal statistics row
+                    tableHTML += `
+                        <tr>
+                            <td>${stat.filename}</td>
+                            <td>${stat.gradient.toFixed(12)}</td>
+                            <td>${stat.intercept.toFixed(6)}</td>
+                            <td>${stat.r2.toFixed(4)}</td>
+                            <td>${stat.rmse.toFixed(6)}</td>
+                            <td>${stat.num_points}</td>
+                        </tr>
+                    `;
+                }
+            });
+            
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            console.log('Setting table HTML and showing container');
+            tableContainer.innerHTML = tableHTML;
+            statsContainer.style.display = 'block';
         }
     </script>
 </body>

@@ -49,30 +49,27 @@ def read_stable_weight():
     Polls for weight until two consecutive readings agree within TOLERANCE.
     Returns weight_g.
     """
-    # Open serial for scale
-    ser = serial.Serial(port=SERIAL_PORT_SCALE,
+    prev = None
+    while True:
+        try:
+            with serial.Serial(port=SERIAL_PORT_SCALE,
                               baudrate=BAUDRATE,
                               bytesize=serial.EIGHTBITS,
                               parity=serial.PARITY_NONE,
                               stopbits=serial.STOPBITS_ONE,
-                              timeout=READ_TIMEOUT)
-    
-    prev = None
-    while True:
-        ser.write(b'w')
-        raw = ser.read(18)
-        try:
-            text = raw.decode('ascii', errors='ignore')
-        except:
+                              timeout=READ_TIMEOUT) as ser:
+                ser.write(b'w')
+                raw = ser.read(18)
+                text = raw.decode('ascii', errors='ignore')
+                w = parse_weight(text)
+                if w is not None:
+                    if prev is not None and abs(w - prev) < TOLERANCE:
+                        return w
+                    prev = w
+        except (serial.SerialException, OSError) as e:
+            print(f"Serial connection error: {e}")
+            time.sleep(1.0)  # Wait before retrying
             continue
-        w = parse_weight(text)
-        if w is None:
-            continue
-        if prev is not None and abs(w - prev) < TOLERANCE:
-            ser.close()
-            del ser
-            return w
-        prev = w
         time.sleep(3.0)
 
 def calibrate_single_pump(pump_serial, direction, repeats=3, pump_key=None):
@@ -96,27 +93,43 @@ def calibrate_single_pump(pump_serial, direction, repeats=3, pump_key=None):
                 # Initial weight
                 mass0 = read_stable_weight()
                 
-                pump = TicUSB(serial_number=pump_serial)  # auto-detect port
-                pump.halt_and_set_position(0)
-                pump.energize()
-                pump.exit_safe_start()
-                pump.set_step_mode(3)
-                pump.set_current_limit(32)
-        
-                # Start pump and maintain velocity
-                vel = steps_rate / STEPS_PER_PULSE if direction == 'forward' else -steps_rate / STEPS_PER_PULSE
-                vel = int(floor(vel))
-                real_steps_rate = abs(vel) * STEPS_PER_PULSE
-                
-                t_start = time.time()
-                while time.time() - t_start < DURATION:
-                    pump.set_target_velocity(vel)
-                pump.set_target_velocity(0)
-                real_duration = time.time() - t_start
-                
-                pump.deenergize()
-                pump.enter_safe_start()
-                del pump
+                # Initialize pump with proper cleanup
+                pump = None
+                try:
+                    pump = TicUSB(serial_number=pump_serial)  # auto-detect port
+                    pump.halt_and_set_position(0)
+                    pump.energize()
+                    pump.exit_safe_start()
+                    pump.set_step_mode(3)
+                    pump.set_current_limit(32)
+            
+                    # Start pump and maintain velocity
+                    vel = steps_rate / STEPS_PER_PULSE if direction == 'forward' else -steps_rate / STEPS_PER_PULSE
+                    vel = int(floor(vel))
+                    real_steps_rate = abs(vel) * STEPS_PER_PULSE
+                    
+                    t_start = time.time()
+                    while time.time() - t_start < DURATION:
+                        try:
+                            pump.set_target_velocity(vel)
+                        except Exception as e:
+                            print(f"Pump control error: {e}")
+                            raise
+                    pump.set_target_velocity(0)
+                    real_duration = time.time() - t_start
+                    
+                except Exception as e:
+                    print(f"Pump operation error: {e}")
+                    raise
+                finally:
+                    # Ensure pump is properly cleaned up
+                    if pump:
+                        try:
+                            pump.deenergize()
+                            pump.enter_safe_start()
+                            del pump
+                        except Exception as e:
+                            print(f"Error cleaning up pump: {e}")
                 
                 # Final weight
                 mass1 = read_stable_weight()

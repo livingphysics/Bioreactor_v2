@@ -59,7 +59,7 @@ def main():
                     y = df['delta_mass_g'].values
                     label = f"{flow} uL/s (Date: {date})"
                     color = cmap(idx)
-                    plot_with_fit_and_bands(x, y, ax=ax, label=label, color=color, show_title=False)
+                    plot_with_fit_and_bands(x, y, ax=ax, label=label, color=color, show_title=False, show_stats_table=False)
                 except Exception as e:
                     print(f"Error plotting {flow} uL/s: {e}")
             else:
@@ -80,7 +80,7 @@ def main():
                     x = df['time_s'].values
                     y = df['delta_mass_g'].values
                     label = f"{flow} uL/s (Date: {date})"
-                    plot_with_fit_and_bands(x, y, ax=ax, label=label, color='b', show_title=True)
+                    plot_with_fit_and_bands(x, y, ax=ax, label=label, color='b', show_title=True, show_stats_table=False)
                 except Exception as e:
                     ax.text(0.5, 0.5, f"Error: {e}", ha='center', va='center')
                     ax.set_title(f"{letter}, {flow} uL/s\n(Date: {date})")
