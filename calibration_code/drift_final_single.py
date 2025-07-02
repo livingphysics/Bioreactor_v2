@@ -12,6 +12,7 @@ import os
 import pandas as pd
 from datetime import datetime
 from calibration_code.calibration_utils import run_drift
+from src.config import Config as cfg
 
 def format_flow_rate_for_filename(flow_rate):
     """
@@ -74,13 +75,21 @@ def main():
     
     print(f"Output will be saved to: {output_path}")
     
+    # Get pump serial numbers from config
+    in_key = f'{letter}_in'
+    out_key = f'{letter}_out'
+    in_pump_serial = cfg.PUMPS[in_key]['serial']
+    out_pump_serial = cfg.PUMPS[out_key]['serial']
+    
+    print(f"Using pump serials: in={in_pump_serial}, out={out_pump_serial}")
+    
     # Run the drift experiment
     print(f"\nStarting drift experiment for pump {letter} at flow rate {flow_rate}...")
     try:
         data_rows = run_drift(
-            in_pump_serial=f"003{letter}",
+            in_pump_serial=in_pump_serial,
             in_steps_rate=in_steps_rate,
-            out_pump_serial=f"003{letter}",
+            out_pump_serial=out_pump_serial,
             out_steps_rate=out_steps_rate,
             duration=1800,  # 30 minutes
             csv_output_path=output_path,
