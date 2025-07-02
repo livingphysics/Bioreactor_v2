@@ -71,10 +71,10 @@ def main():
     
     # Read the compiled results
     try:
-        df = pd.read_csv('binary_results_compiled.csv')
+        df = pd.read_csv('calibration_code/binary_results_compiled.csv')
         print(f"Loaded binary_results_compiled.csv with {len(df)} rows")
     except FileNotFoundError:
-        print("Error: binary_results_compiled.csv not found")
+        print("Error: binary_results_compiled.csv not found in calibration_code directory")
         return
     
     # Add actual_drift_rate column if it doesn't exist
@@ -123,7 +123,7 @@ def main():
                 missing_count += 1
     
     # Save updated results
-    df.to_csv('binary_results_compiled.csv', index=False)
+    df.to_csv('calibration_code/binary_results_compiled.csv', index=False)
     
     # Summary
     print(f"\n{'='*60}")

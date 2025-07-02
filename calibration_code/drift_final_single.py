@@ -42,9 +42,9 @@ def main():
     
     # Read the compiled results
     try:
-        df = pd.read_csv('binary_results_compiled.csv')
+        df = pd.read_csv('calibration_code/binary_results_compiled.csv')
     except FileNotFoundError:
-        print("Error: binary_results_compiled.csv not found in current directory")
+        print("Error: binary_results_compiled.csv not found in calibration_code directory")
         sys.exit(1)
     
     # Find the relevant row
