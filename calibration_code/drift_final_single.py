@@ -11,7 +11,7 @@ import sys
 import os
 import pandas as pd
 from datetime import datetime
-from calibration_utils import run_drift
+from calibration_code.calibration_utils import run_drift
 
 def format_flow_rate_for_filename(flow_rate):
     """
