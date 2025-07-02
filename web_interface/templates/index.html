@@ -185,6 +185,19 @@
             font-style: italic;
             padding: 20px;
         }
+        
+        .checkbox-control {
+            margin-top: 10px;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .checkbox-control label {
+            font-size: 14px;
+            color: #495057;
+        }
     </style>
 </head>
 <body>
@@ -204,6 +217,12 @@
             <div class="controls">
                 <button id="plot-btn" onclick="plotSelectedFiles()" disabled>Plot Selected Files</button>
                 <button id="clear-btn" onclick="clearPlot()">Clear Plot</button>
+                <div class="checkbox-control">
+                    <label style="display: inline-flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" id="error-bars-checkbox" checked style="margin-right: 8px;">
+                        Show Error Bars (Homoskedastic & Heteroskedastic)
+                    </label>
+                </div>
             </div>
             <div id="error-message"></div>
             <div id="plot-container">
@@ -225,6 +244,14 @@
         // Load file tree on page load
         window.onload = function() {
             loadFileTree();
+            
+            // Add event listener for error bars checkbox
+            document.getElementById('error-bars-checkbox').addEventListener('change', function() {
+                // If we have a current plot, regenerate it with new error bar setting
+                if (selectedFiles.size > 0) {
+                    plotSelectedFiles();
+                }
+            });
         };
 
         async function loadFileTree() {
@@ -310,13 +337,15 @@
             clearError();
 
             try {
+                const showErrorBars = document.getElementById('error-bars-checkbox').checked;
                 const response = await fetch('/api/plot', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        files: Array.from(selectedFiles)
+                        files: Array.from(selectedFiles),
+                        showErrorBars: showErrorBars
                     })
                 });
 

@@ -35,6 +35,7 @@ def generate_plot():
     try:
         data = request.get_json()
         file_paths = data.get('files', [])
+        show_error_bars = data.get('showErrorBars', True)  # Default to True for backward compatibility
         
         if not file_paths:
             return jsonify({'success': False, 'error': 'No files selected'}), 400
@@ -50,7 +51,7 @@ def generate_plot():
                 return jsonify({'success': False, 'error': f'File not found: {file_path}'}), 404
             absolute_paths.append(absolute_path)
         
-        result = plot_csv_files(absolute_paths)
+        result = plot_csv_files(absolute_paths, show_error_bars)
         return jsonify({
             'success': True, 
             'data': result['plot_data'],

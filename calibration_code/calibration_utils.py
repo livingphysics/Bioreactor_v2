@@ -51,27 +51,39 @@ def parse_weight(s: str) -> float:
 def read_stable_weight():
     """Read a stable weight from the scale, waiting for two consecutive readings within tolerance."""
     prev = None
-    while True:
+    max_retries = 10
+    retry_count = 0
+    
+    while retry_count < max_retries:
+        ser = None
         try:
-            with serial.Serial(port=SERIAL_PORT_SCALE,
+            ser = serial.Serial(port=SERIAL_PORT_SCALE,
                               baudrate=BAUDRATE,
                               bytesize=serial.EIGHTBITS,
                               parity=serial.PARITY_NONE,
                               stopbits=serial.STOPBITS_ONE,
-                              timeout=READ_TIMEOUT) as ser:
-                ser.write(b'w')
-                raw = ser.read(18)
-                text = raw.decode('ascii', errors='ignore')
-                w = parse_weight(text)
-                if w is not None:
-                    if prev is not None and abs(w - prev) < TOLERANCE:
-                        return w
-                    prev = w
+                              timeout=READ_TIMEOUT)
+            ser.write(b'w')
+            raw = ser.read(18)
+            text = raw.decode('ascii', errors='ignore')
+            w = parse_weight(text)
+            if w is not None:
+                if prev is not None and abs(w - prev) < TOLERANCE:
+                    return w
+                prev = w
         except (serial.SerialException, OSError) as e:
             print(f"Serial connection error: {e}")
+            retry_count += 1
             time.sleep(1.0)  # Wait before retrying
-            continue
+        finally:
+            if ser is not None:
+                try:
+                    ser.close()
+                except Exception:
+                    pass
         time.sleep(3.0)
+    
+    raise Exception(f"Failed to read stable weight after {max_retries} retries")
 
 # --- Experiment running utilities ---
 def run_drift(in_pump_serial, in_steps_rate, out_pump_serial, out_steps_rate, duration=1800, measurement_times=None, csv_output_path=None, log_progress=True):

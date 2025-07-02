@@ -47,7 +47,7 @@ def read_csv_file(file_path: str) -> tuple:
     except Exception as e:
         raise ValueError(f"Error reading {file_path}: {str(e)}")
 
-def generate_plot_data(file_paths: list) -> dict:
+def generate_plot_data(file_paths: list, show_error_bars: bool = True) -> dict:
     """
     Generate plot data for multiple CSV files.
     Returns Plotly-compatible data structure with statistics.
@@ -79,9 +79,10 @@ def generate_plot_data(file_paths: list) -> dict:
             x_grid = np.linspace(np.min(x_data), np.max(x_data), 200)
             y_grid = model.predict(x_grid.reshape(-1, 1))
             
-            # Calculate error bands
-            band_low, band_high = calculate_heteroskedastic_band(x_data, y_data, model, x_grid)
-            low, high = calculate_homoskedastic_band(x_data, y_data, model, x_grid)
+            # Calculate error bands only if requested
+            if show_error_bars:
+                band_low, band_high = calculate_heteroskedastic_band(x_data, y_data, model, x_grid)
+                low, high = calculate_homoskedastic_band(x_data, y_data, model, x_grid)
             
             color = colors[i % len(colors)]
             
@@ -105,27 +106,29 @@ def generate_plot_data(file_paths: list) -> dict:
                 showlegend=True
             ))
             
-            # Add homoskedastic error band
-            fig.add_trace(go.Scatter(
-                x=np.concatenate([x_grid, x_grid[::-1]]).tolist(),  # Convert numpy array to list
-                y=np.concatenate([high, low[::-1]]).tolist(),  # Convert numpy array to list
-                fill='toself',
-                fillcolor=f'rgba(255, 215, 0, 0.25)',  # Gold with transparency
-                line=dict(color='rgba(255,255,255,0)'),
-                name=f'{filename} (homo band)',
-                showlegend=False
-            ))
-            
-            # Add heteroskedastic error band
-            fig.add_trace(go.Scatter(
-                x=np.concatenate([x_grid, x_grid[::-1]]).tolist(),  # Convert numpy array to list
-                y=np.concatenate([band_high, band_low[::-1]]).tolist(),  # Convert numpy array to list
-                fill='toself',
-                fillcolor=f'rgba(240, 128, 128, 0.25)',  # Light coral with transparency
-                line=dict(color='rgba(255,255,255,0)'),
-                name=f'{filename} (hetero band)',
-                showlegend=False
-            ))
+            # Add error bands only if requested
+            if show_error_bars:
+                # Add homoskedastic error band
+                fig.add_trace(go.Scatter(
+                    x=np.concatenate([x_grid, x_grid[::-1]]).tolist(),  # Convert numpy array to list
+                    y=np.concatenate([high, low[::-1]]).tolist(),  # Convert numpy array to list
+                    fill='toself',
+                    fillcolor=f'rgba(255, 215, 0, 0.25)',  # Gold with transparency
+                    line=dict(color='rgba(255,255,255,0)'),
+                    name=f'{filename} (homo band)',
+                    showlegend=False
+                ))
+                
+                # Add heteroskedastic error band
+                fig.add_trace(go.Scatter(
+                    x=np.concatenate([x_grid, x_grid[::-1]]).tolist(),  # Convert numpy array to list
+                    y=np.concatenate([band_high, band_low[::-1]]).tolist(),  # Convert numpy array to list
+                    fill='toself',
+                    fillcolor=f'rgba(240, 128, 128, 0.25)',  # Light coral with transparency
+                    line=dict(color='rgba(255,255,255,0)'),
+                    name=f'{filename} (hetero band)',
+                    showlegend=False
+                ))
             
         except Exception as e:
             # Add error trace to show the problem
@@ -163,12 +166,16 @@ def generate_plot_data(file_paths: list) -> dict:
         'statistics': statistics
     }
 
-def plot_csv_files(file_paths: list) -> dict:
+def plot_csv_files(file_paths: list, show_error_bars: bool = True) -> dict:
     """
     Main function to plot multiple CSV files.
     Returns Plotly figure data and statistics.
+    
+    Args:
+        file_paths: List of file paths to plot
+        show_error_bars: Whether to include error bands (homoskedastic and heteroskedastic)
     """
     if not file_paths:
         raise ValueError("No file paths provided")
     
-    return generate_plot_data(file_paths) 
+    return generate_plot_data(file_paths, show_error_bars) 
