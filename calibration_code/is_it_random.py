@@ -45,11 +45,8 @@ def run_debubblify(letter, duration_minutes=20):
     # Start debubblify in background
     try:
         # Run debubblify for the specified pump
-        process = subprocess.Popen([
-            sys.executable, 
-            os.path.join('hardware_testing', 'debubblify.py'), 
-            letter
-        ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        PYTHON_CMD = "/home/michele/venv/bin/python3"
+        process = subprocess.Popen([PYTHON_CMD, "-m", "hardware_testing.debubblify"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         
         # Let it run for the specified duration
         time.sleep(duration_minutes * 60)
