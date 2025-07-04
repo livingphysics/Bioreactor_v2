@@ -194,10 +194,10 @@ def run_binary(letter, rate, mode='steps'):
     log_to_csv(search_rows, search_cols, search_csv)
     print(f"Binary search results saved to {search_csv}")
     # 5. Final drift experiment
-    # print(f"Running final drift experiment for 30 min: in {in_rate}, out {best_out_rate}")
-    # drift_csv = os.path.join(BINARY_DRIFT_DIR, f"{date_str}_binary_drift_{letter}_{in_rate}_{best_out_rate}_results.csv")
-    # run_drift(in_pump, in_rate, out_pump, best_out_rate, duration=1800, measurement_times=None, csv_output_path=drift_csv, log_progress=True)
-    # print(f"Drift results saved to {drift_csv}")
+    print(f"Running final drift experiment for 30 min: in {in_rate}, out {best_out_rate}")
+    drift_csv = os.path.join(BINARY_DRIFT_DIR, f"{date_str}_binary_drift_{letter}_{in_rate}_{best_out_rate}_results.csv")
+    run_drift(in_pump, in_rate, out_pump, best_out_rate, duration=1800, measurement_times=None, csv_output_path=drift_csv, log_progress=True)
+    print(f"Drift results saved to {drift_csv}")
 
 def main():
     # Parse command line arguments

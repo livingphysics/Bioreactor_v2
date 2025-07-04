@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CSV File Browser and Plotter</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.27.1/plotly.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -243,6 +243,14 @@
 
         // Load file tree on page load
         window.onload = function() {
+            // Check if Plotly loaded properly
+            if (typeof Plotly === 'undefined') {
+                console.error('Plotly library failed to load');
+                showError('Warning: Plotly library may not have loaded properly. Plotting may not work.');
+            } else {
+                console.log('Plotly library loaded successfully');
+            }
+            
             loadFileTree();
             
             // Add event listener for error bars checkbox
@@ -329,6 +337,12 @@
         async function plotSelectedFiles() {
             if (selectedFiles.size === 0) {
                 showError('No files selected');
+                return;
+            }
+
+            // Check if Plotly is available
+            if (typeof Plotly === 'undefined') {
+                showError('Plotly library not loaded. Please refresh the page and try again.');
                 return;
             }
 
