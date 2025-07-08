@@ -26,7 +26,7 @@ from datetime import datetime
 
 # Configuration
 STEPS_MIN = 200 *1000             # steps/sec minimum
-STEPS_MAX = 200 * 1000           # steps/sec maximum
+STEPS_MAX = 200 *1000           # steps/sec maximum
 NUM_POINTS = 1            # number of test points
 DURATION = 10.0            # seconds per test
 
