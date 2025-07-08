@@ -88,13 +88,14 @@ def calibrate_single_pump(pump_serial, direction, repeats=3, pump_key=None):
     csv_filename = f"calibration_results/{date_str}_calibration_{pump_key}_{direction}_results.csv"
     with open(csv_filename, 'w', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow(['steps_rate', 'duration', 'delta_mass', 'ml_rate'])
+        writer.writerow(['timestamp', 'steps_rate', 'duration', 'delta_mass', 'ml_rate'])
         for _ in range(repeats):
             np.random.shuffle(steps_rates)  # Randomize the order
             print(f"{steps_rates=}")
             for steps_rate in steps_rates:
 
                 # Initial weight
+                timestamp_start = datetime.now()
                 mass0 = read_stable_weight()
                 
                 # Initialize pump with proper cleanup
@@ -142,7 +143,7 @@ def calibrate_single_pump(pump_serial, direction, repeats=3, pump_key=None):
                 delta_mass = mass1 - mass0
                 ml_rate = abs(delta_mass) / real_duration / DENSITY_OF_WATER
 
-                writer.writerow([real_steps_rate, real_duration, delta_mass, ml_rate])
+                writer.writerow([timestamp_start.isoformat(), real_steps_rate, real_duration, delta_mass, ml_rate])
                 print(f"Rate {real_steps_rate} steps/s -> actual {ml_rate:.4f} ml/s")
 
 def parse_args():
