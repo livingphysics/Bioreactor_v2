@@ -21,10 +21,10 @@ from src.config import Config as cfg
 from datetime import datetime
 
 # Configuration
-STEPS_MIN = 50 *1000             # steps/sec minimum
-STEPS_MAX = 250 * 1000           # steps/sec maximum
-NUM_POINTS = 41            # number of test points
-DURATION = 60.0            # seconds per test
+STEPS_MIN = 200 *1000             # steps/sec minimum
+STEPS_MAX = 200 * 1000           # steps/sec maximum
+NUM_POINTS = 1            # number of test points
+DURATION = 20.0            # seconds per test
 
 DENSITY_OF_WATER = 1.0     # g/ml
 FLASK_CAPACITY = 1000.0      # ml
@@ -203,7 +203,7 @@ def main():
         for pump_key in ordered_pump_keys:
             pump_serial = cfg.PUMPS[pump_key]['serial']
             print(f"\n=== Calibration for {pump_key} (serial: {pump_serial}), direction: {direction} ===")
-            calibrate_single_pump(pump_serial, direction, repeats=3, pump_key=pump_key)
+            calibrate_single_pump(pump_serial, direction, repeats=24, pump_key=pump_key)
             print(f"Calibration for {pump_key} (serial: {pump_serial}), direction: {direction} complete.\n")
 
 if __name__ == '__main__':
