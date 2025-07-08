@@ -4,10 +4,10 @@ pump_control.py
 A module for controlling individual pumps with specific parameters.
 
 Example usage:
-    python pump_control.py A in forward 1000    # Run pump A_in forward at 1000 steps/s
-    python pump_control.py B out reverse 2000   # Run pump B_out reverse at 2000 steps/s
-    python pump_control.py C in forward 500     # Run pump C_in forward at 500 steps/s
-    python pump_control.py D out forward 1500   # Run pump D_out forward at 1500 steps/s
+    python pump_control.py A in forward 1000                    # Run pump A_in forward at 1000 steps/s until cancelled
+    python pump_control.py B out reverse 2000 --duration 30     # Run pump B_out reverse at 2000 steps/s for 30 minutes
+    python pump_control.py C in forward 500 --duration 15.5     # Run pump C_in forward at 500 steps/s for 15.5 minutes
+    python pump_control.py D out forward 1500                   # Run pump D_out forward at 1500 steps/s until cancelled
 """
 
 import time
@@ -18,18 +18,40 @@ from src.config import Config as cfg
 
 # --- Argument parsing ---
 def parse_args():
-    if len(sys.argv) != 5:
-        print("Usage: python pump_control.py <letter> <pump_type> <direction> <rate>")
+    if len(sys.argv) < 5:
+        print("Usage: python pump_control.py <letter> <pump_type> <direction> <rate> [--duration <minutes>]")
         print("  letter: A, B, C, or D")
         print("  pump_type: 'in' or 'out'")
         print("  direction: 'forward' or 'reverse'")
         print("  rate: steps per second (integer)")
+        print("  --duration: optional duration in minutes (default: run until cancelled)")
         sys.exit(1)
     
     letter = sys.argv[1].upper()
     pump_type = sys.argv[2].lower()
     direction = sys.argv[3].lower()
     rate = int(sys.argv[4])
+    duration_minutes = None
+    
+    # Parse optional --duration flag
+    i = 5
+    while i < len(sys.argv):
+        if sys.argv[i] == '--duration':
+            if i + 1 >= len(sys.argv):
+                print("Error: --duration requires a value")
+                sys.exit(1)
+            try:
+                duration_minutes = float(sys.argv[i + 1])
+                if duration_minutes <= 0:
+                    print("Error: Duration must be positive")
+                    sys.exit(1)
+            except ValueError:
+                print("Error: Duration must be a number")
+                sys.exit(1)
+            i += 2
+        else:
+            print(f"Error: Unknown argument: {sys.argv[i]}")
+            sys.exit(1)
     
     # Validate inputs
     if letter not in ['A', 'B', 'C', 'D']:
@@ -48,7 +70,7 @@ def parse_args():
         print(f"Error: Rate must be positive. Got: {rate}")
         sys.exit(1)
     
-    return letter, pump_type, direction, rate
+    return letter, pump_type, direction, rate, duration_minutes
 
 # --- Get pump serial ---
 def get_pump_serial(letter, pump_type):
@@ -139,10 +161,10 @@ def run_pump(letter, pump_type, direction, rate_steps_per_sec, duration_minutes=
 
 # --- Command line interface ---
 if __name__ == "__main__":
-    letter, pump_type, direction, rate = parse_args()
+    letter, pump_type, direction, rate, duration_minutes = parse_args()
     
     try:
-        run_pump(letter, pump_type, direction, rate)
+        run_pump(letter, pump_type, direction, rate, duration_minutes)
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1) 
