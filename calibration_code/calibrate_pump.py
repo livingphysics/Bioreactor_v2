@@ -6,8 +6,12 @@ Example usage:
     python -m calibration_code.calibrate_pump B --reverse    # Calibrate both B_in and B_out in reverse
     python -m calibration_code.calibrate_pump A_in B C_out   # Calibrate A_in, B_in, B_out, and C_out forward (in order)
     python -m calibration_code.calibrate_pump A_in B --both  # Calibrate A_in, B_in, B_out both directions
+    python -m calibration_code.calibrate_pump A --in         # Calibrate only A_in forward
+    python -m calibration_code.calibrate_pump B C --out      # Calibrate only B_out and C_out forward
+    python -m calibration_code.calibrate_pump --in --reverse # Calibrate all in pumps in reverse
 
 If no pump or letter is given, all pumps are calibrated. Default direction is forward.
+Default behavior appends both _in and _out to letters unless --in or --out is specified.
 """
 import time
 import csv
@@ -146,6 +150,7 @@ def parse_args():
     directions = []
     pump_tokens = []
     direction_flag = 'forward'
+    pump_type_flag = None  # None means both in and out (default behavior)
     for arg in args:
         if arg == '--forward':
             direction_flag = 'forward'
@@ -153,28 +158,42 @@ def parse_args():
             direction_flag = 'reverse'
         elif arg == '--both':
             direction_flag = 'both'
+        elif arg == '--in':
+            pump_type_flag = 'in'
+        elif arg == '--out':
+            pump_type_flag = 'out'
         elif arg.startswith('--'):
             print(f"Unknown flag: {arg}")
             sys.exit(1)
         else:
             pump_tokens.append(arg)
-    return pump_tokens, direction_flag
+    return pump_tokens, direction_flag, pump_type_flag
 
 # Helper to expand user tokens to pump keys
 PUMP_KEYS = list(cfg.PUMPS.keys())
 PUMP_LETTERS = ['A', 'B', 'C', 'D']
 
-def expand_pump_tokens(tokens):
+def expand_pump_tokens(tokens, pump_type_flag=None):
     # If no tokens, return all pumps
     if not tokens:
-        return PUMP_KEYS.copy()
+        if pump_type_flag is None:
+            return PUMP_KEYS.copy()
+        else:
+            # Return only in or out pumps based on flag
+            return [key for key in PUMP_KEYS if key.endswith(f'_{pump_type_flag}')]
+    
     result = []
     for token in tokens:
         t = token.upper()
         if t in PUMP_LETTERS:
-            # Add both in and out for this letter
-            result.append(f'{t}_in')
-            result.append(f'{t}_out')
+            # Add in and/or out for this letter based on pump_type_flag
+            if pump_type_flag is None:
+                # Default behavior: add both in and out
+                result.append(f'{t}_in')
+                result.append(f'{t}_out')
+            else:
+                # Only add the specified type
+                result.append(f'{t}_{pump_type_flag}')
         elif t.endswith('_IN') or t.endswith('_OUT'):
             # Add specific pump if valid
             key = t.capitalize() if t[1] == '_' else t[0].upper() + t[1:].lower()
@@ -189,8 +208,8 @@ def expand_pump_tokens(tokens):
     return result
 
 def main():
-    pump_tokens, direction_flag = parse_args()
-    pump_keys = expand_pump_tokens(pump_tokens)
+    pump_tokens, direction_flag, pump_type_flag = parse_args()
+    pump_keys = expand_pump_tokens(pump_tokens, pump_type_flag)
     # Remove duplicates but preserve order
     seen = set()
     ordered_pump_keys = []
