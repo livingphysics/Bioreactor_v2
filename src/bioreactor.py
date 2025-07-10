@@ -222,23 +222,7 @@ class Bioreactor():
             self.logger.error(f"Error changing ring light: {e}")
             raise
 
-    @contextmanager
-    def led_context(self):
-        """
-        Context manager to turn on IR LEDs for photodiode readings.
-        Automatically turns LEDs off when exiting the context.
-        """
-        if not self._initialized.get('leds'):
-            yield
-            return
-        
-        try:
-            # Turn on IR LEDs
-            self.change_led(True)
-            yield
-        finally:
-            # Turn off IR LEDs
-            self.change_led(False)
+
 
     def change_peltier(self, power: int, forward: bool) -> None:
         """Change the peltier power and direction.
@@ -289,11 +273,33 @@ class Bioreactor():
         if not self._initialized.get('optical_density'):
             return [float('nan')] * 12
         
+        # Turn on IR LEDs if available
+        leds_were_on = False
+        if self._initialized.get('leds'):
+            try:
+                # Check if LEDs are already on
+                leds_were_on = IO.input(self.led_pin) == 1
+                if not leds_were_on:
+                    self.change_led(True)
+                    # Wait for photodiodes to stabilize
+                    time.sleep(0.1)
+            except Exception as e:
+                self.logger.error(f"Error controlling LEDs for photodiode reading: {e}")
+        
         try:
-            return [self.adc_1.read(i) * self.REF_1 / 65535.0 for i in self.cfg.ADC_1_PHOTODIODE_CHANNELS] + [self.adc_2.read(i) * self.REF_2 / 65535.0 for i in self.cfg.ADC_2_PHOTODIODE_CHANNELS]
+            # Read photodiodes while LEDs are on
+            readings = [self.adc_1.read(i) * self.REF_1 / 65535.0 for i in self.cfg.ADC_1_PHOTODIODE_CHANNELS] + [self.adc_2.read(i) * self.REF_2 / 65535.0 for i in self.cfg.ADC_2_PHOTODIODE_CHANNELS]
+            return readings
         except Exception as e:
             self.logger.error(f"Error reading photodiodes: {e}")
             return [float('nan')] * 12
+        finally:
+            # Turn off LEDs only if we turned them on
+            if self._initialized.get('leds') and not leds_were_on:
+                try:
+                    self.change_led(False)
+                except Exception as e:
+                    self.logger.error(f"Error turning off LEDs after photodiode reading: {e}")
         
     def get_io_temp(self):
         if not self._initialized.get('optical_density'):

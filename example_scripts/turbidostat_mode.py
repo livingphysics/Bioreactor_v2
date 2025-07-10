@@ -50,11 +50,10 @@ def turbidostat_mode(
     # --- EKF state ---
     # Initial OD measurement
     def measure_od(bio):
-        with bio.led_context():
-            readings = bio.get_photodiodes()
-            od_reading = readings[od_sensor_channel]
-            od = 2.0 * od_reading - 0.1  # Example calibration
-            return max(0.0, od)
+        readings = bio.get_photodiodes()
+        od_reading = readings[od_sensor_channel]
+        od = 2.0 * od_reading - 0.1  # Example calibration
+        return max(0.0, od)
 
     initial_od = measure_od(bioreactor)
     ekf = ExtendedKalmanFilter(
