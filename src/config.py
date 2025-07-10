@@ -28,12 +28,15 @@ class Config:
     # ADC Configuration
     ADC_1_ADDRESS: int = 0x48
     ADC_2_ADDRESS: int = 0x49
-    ADC_2_REF_VOLTAGE: float = 4.7
     ADC_1_REF_VOLTAGE: float = 4.7
+    ADC_2_REF_VOLTAGE: float = 4.7
     ADC_1_135_CHANNELS: list[int] = [0,1,2,3]
     ADC_1_180_CHANNELS: list[int] = [4,5,6,7]
     ADC_2_REF_CHANNELS: list[int] = [0,1,2,3]
+    ADC_1_IO_TEMP_CHANNELS: list[int] = []
     ADC_2_IO_TEMP_CHANNELS: list[int] = [4, 5]
+    ADC_1_PHOTODIODE_CHANNELS: list[int] = [0,1,2,3,4,5,6,7]
+    ADC_2_PHOTODIODE_CHANNELS: list[int] = [0,1,2,3]
 
     # Temperature Sensor Arrays
     VIAL_TEMP_SENSOR_ORDER: list[int] = [0, 3, 2, 1]

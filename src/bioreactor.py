@@ -15,7 +15,7 @@ import RPi.GPIO as IO
 from adafruit_ina219 import INA219
 from matplotlib.animation import FuncAnimation
 from ticlib import TicUSB
-import u3
+
 
 from .config import Config as cfg
 from ds18b20 import DS18B20
