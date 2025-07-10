@@ -222,6 +222,24 @@ class Bioreactor():
             self.logger.error(f"Error changing ring light: {e}")
             raise
 
+    @contextmanager
+    def led_context(self):
+        """
+        Context manager to turn on IR LEDs for photodiode readings.
+        Automatically turns LEDs off when exiting the context.
+        """
+        if not self._initialized.get('leds'):
+            yield
+            return
+        
+        try:
+            # Turn on IR LEDs
+            self.change_led(True)
+            yield
+        finally:
+            # Turn off IR LEDs
+            self.change_led(False)
+
     def change_peltier(self, power: int, forward: bool) -> None:
         """Change the peltier power and direction.
         

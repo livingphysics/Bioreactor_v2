@@ -11,7 +11,10 @@ def measure_and_write_sensor_data(bioreactor, elapsed):
         bioreactor: Bioreactor object with .writer, .get_photodiodes(), .get_io_temp(), .get_vial_temp(), .get_peltier_curr()
         elapsed: float, elapsed time in seconds
     """
-    photodiodes = bioreactor.get_photodiodes()
+    # Read photodiodes with IR LEDs on
+    with bioreactor.led_context():
+        photodiodes = bioreactor.get_photodiodes()
+    
     io_temps = bioreactor.get_io_temp()
     vial_temps = bioreactor.get_vial_temp()
     peltier_current = bioreactor.get_peltier_curr()
