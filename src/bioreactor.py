@@ -289,6 +289,7 @@ class Bioreactor():
         try:
             # Read photodiodes while LEDs are on
             readings = [self.adc_1.read(i) * self.REF_1 / 65535.0 for i in self.cfg.ADC_1_PHOTODIODE_CHANNELS] + [self.adc_2.read(i) * self.REF_2 / 65535.0 for i in self.cfg.ADC_2_PHOTODIODE_CHANNELS]
+            self.logger.info(f"Photodiodes Read ")
             return readings
         except Exception as e:
             self.logger.error(f"Error reading photodiodes: {e}")

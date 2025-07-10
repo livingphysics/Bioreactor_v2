@@ -17,9 +17,9 @@ class Config:
     LED_MODE: str = 'bcm'
 
     # Stirrer Configuration
-    STIRRER_PIN: int = 35
+    STIRRER_PIN: int = 19
     STIRRER_SPEED: int = 1000
-    DUTY_CYCLE: int = 35
+    DUTY_CYCLE: int = 55
 
     # Ring Light Configuration
     RING_LIGHT_COUNT: int = 32
