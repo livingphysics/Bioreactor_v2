@@ -151,8 +151,8 @@ class Bioreactor():
                     direction = settings.get('direction')
                     if direction not in ('forward', 'reverse'):
                         raise ValueError(f"Pump {name} must have direction set to 'forward' or 'reverse'")
-                    if 'forward' not in settings or 'reverse' not in settings:
-                        raise ValueError(f"Pump {name} must have both 'forward' and 'reverse' calibration settings")
+                    if 'forward' not in settings:
+                        raise ValueError(f"Pump {name} must have 'forward' calibration settings")
                     tic = TicUSB(serial_number=serial)
                     tic.energize()
                     tic.exit_safe_start()
