@@ -1,6 +1,8 @@
 import logging
 import time
 
+import matplotlib
+matplotlib.use('Agg')  # Use non-interactive backend
 import matplotlib.pyplot as plt
 
 from src.bioreactor import Bioreactor
@@ -20,7 +22,6 @@ def main():
     # Set up the plot
     times = []
     temperature = [[] for _ in range(4)]
-    plt.ion()
     fig, ax = plt.subplots(figsize=(10, 6))
     lines = [ax.plot([], [], label=f'Sensor {i+1}')[0] for i in range(4)]
     ax.set_xlabel('Time (s)')
@@ -41,8 +42,8 @@ def main():
             line.set_data(times, temperature[i])
         ax.relim()
         ax.autoscale_view()
-        fig.canvas.draw()
-        fig.canvas.flush_events()
+        # Save plot to file instead of interactive display
+        plt.savefig('temperature_plot.png', dpi=150, bbox_inches='tight')
 
     jobs = [
         (job, DT, True)
