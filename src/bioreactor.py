@@ -160,8 +160,7 @@ class Bioreactor():
                     tic.set_current_limit(32)
                     self.pumps[name] = tic
                     self.calibration[name] = {
-                        'forward': settings['forward'],
-                        'reverse': settings['reverse']
+                        'forward': settings['forward']
                     }
                     self.pump_direction[name] = direction
                     self.logger.info(f"Pump {name} initialized (serial {serial}, direction {direction}).")
