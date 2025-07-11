@@ -63,7 +63,7 @@ if __name__ == "__main__":
                 bioreactor=bioreactor,
                 pump_name='tube_1_in',
                 flow_rate_ml_s=0.01,
-                temp_setpoint=37.0,
+                temp_setpoint=30.0,
                 kp=10.0,
                 ki=1.0,
                 kd=0.0,
