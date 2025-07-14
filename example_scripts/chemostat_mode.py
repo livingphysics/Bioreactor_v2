@@ -61,7 +61,7 @@ if __name__ == "__main__":
         with Bioreactor() as bioreactor:
             chemostat_mode(
                 bioreactor=bioreactor,
-                pump_name='tube_1_in',
+                pump_name='A_in',
                 flow_rate_ml_s=0.01,
                 temp_setpoint=30.0,
                 kp=10.0,
