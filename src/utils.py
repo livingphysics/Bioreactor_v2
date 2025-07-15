@@ -132,7 +132,7 @@ class ExtendedKalmanFilter:
         self.dt = dt / 3600.0
         self.biomass_history = [initial_biomass]
         self.growth_rate_history = [initial_growth_rate]
-        self.time_history = [0]
+        self.time_history = [0.0]
         self.measurement_history = [initial_biomass]
         self.total_time = 0.0
 
@@ -167,7 +167,9 @@ class ExtendedKalmanFilter:
 
     def plot_history(self):
         import matplotlib.pyplot as plt
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
+        fig, axes = plt.subplots(2, 1, figsize=(10, 8))
+        ax1 = axes[0]  # type: ignore
+        ax2 = axes[1]  # type: ignore
         time_hours = np.array(self.time_history) / 3600.0
         ax1.plot(time_hours, self.biomass_history, 'b-', label='Estimated Biomass')
         ax1.scatter(time_hours, self.measurement_history, c='r', marker='.', label='Measurements')
