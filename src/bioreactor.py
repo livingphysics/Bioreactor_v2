@@ -281,7 +281,7 @@ class Bioreactor():
                 if not leds_were_on:
                     self.change_led(True)
                     # Wait for photodiodes to stabilize
-                    time.sleep(0.5)
+                    time.sleep(1.0)
             except Exception as e:
                 self.logger.error(f"Error controlling LEDs for photodiode reading: {e}")
         
