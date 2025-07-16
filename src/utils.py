@@ -125,9 +125,9 @@ def compensated_flow(bioreactor, pump_name, ml_per_sec, elapsed=None):
         out_names = [pump_name + '_out']
     elif pump_name.endswith('_in'):
         in_names = [pump_name]
-        out_names = [pump_name[:-3] + 'out']
+        out_names = [pump_name[:-3] + '_out']
     elif pump_name.endswith('_out'):
-        in_names = [pump_name[:-4] + 'in']
+        in_names = [pump_name[:-4] + '_in']
         out_names = [pump_name]
     elif pump_name.startswith('All'):
         in_names = ['A_in', 'B_in', 'C_in', 'D_in']
