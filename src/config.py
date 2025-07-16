@@ -117,7 +117,6 @@ class Config:
         'photodiode_12': 'vial_D_reference',
         'io_temp_1': 'io_temp_in',
         'io_temp_2': 'io_temp_out',
-        'io_temp_2': 'io_temp_out',
         'vial_temp_1': 'vial_A_temp',
         'vial_temp_2': 'vial_B_temp',
         'vial_temp_3': 'vial_C_temp',
