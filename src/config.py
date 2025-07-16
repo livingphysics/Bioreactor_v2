@@ -50,42 +50,42 @@ class Config:
         'A_in':  {
             'serial': '00473498',
             'direction': 'forward',  # user-set: 'forward' or 'reverse'
-            'forward': {'gradient': 0.002, 'intercept': 0.0},
+            'forward': {'gradient': 0.0000001, 'intercept': 0.0},
         },
         'A_out': {
             'serial': '00473497',
             'direction': 'forward',
-            'forward': {'gradient': 0.002, 'intercept': 0.0},
+            'forward': {'gradient': 0.0000001, 'intercept': 0.0},
         },
         'B_in':  {
             'serial': '00473504',
             'direction': 'forward',
-            'forward': {'gradient': 0.002, 'intercept': 0.0},
+            'forward': {'gradient': 0.0000001, 'intercept': 0.0},
         },
         'B_out': {
             'serial': '00473508',
             'direction': 'forward',
-            'forward': {'gradient': 0.002, 'intercept': 0.0},
+            'forward': {'gradient': 0.0000001, 'intercept': 0.0},
         },
         'C_in':  {
             'serial': '00473510',
             'direction': 'forward',
-            'forward': {'gradient': 0.002, 'intercept': 0.0},
+            'forward': {'gradient': 0.0000001, 'intercept': 0.0},
         },
         'C_out': {
             'serial': '00473517',
             'direction': 'forward',
-            'forward': {'gradient': 0.002, 'intercept': 0.0},
+            'forward': {'gradient': 0.0000001, 'intercept': 0.0},
         },
         'D_in':  {
             'serial': '00473491',
             'direction': 'forward',
-            'forward': {'gradient': 0.002, 'intercept': 0.0},
+            'forward': {'gradient': 0.0000001, 'intercept': 0.0},
         },
         'D_out': {
             'serial': '00473552',
             'direction': 'forward',
-            'forward': {'gradient': 0.002, 'intercept': 0.0},
+            'forward': {'gradient': 0.0000001, 'intercept': 0.0},
         },
     }
 

@@ -91,7 +91,7 @@ try:
     while True:
         for pump in pumps:
             try:
-                pump.set_target_velocity(-velocity)
+                pump.set_target_velocity(velocity)
             except Exception as e:
                 print(f"Error setting velocity for pump: {e}")
         time.sleep(0.05)  # 50ms loop

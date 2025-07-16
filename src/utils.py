@@ -126,7 +126,7 @@ def compensated_flow(bioreactor, pump_name, ml_per_sec, elapsed=None):
     elif pump_name.endswith('_out'):
         in_names = pump_name[:-4] + 'in'
         out_names = pump_name
-    elif pump_name.contains('All'):
+    elif pump_name.startswith('All'):
         in_names = ['A_in', 'B_in', 'C_in', 'D_in']
         out_names = ['A_out', 'B_out', 'C_out', 'D_out']
     else:
@@ -137,7 +137,8 @@ def compensated_flow(bioreactor, pump_name, ml_per_sec, elapsed=None):
         bioreactor.change_pump(out_name, ml_per_sec*1.1)
 
     if logger:
-        logger.info(f"Balanced flow: {pump_name} and {converse} set to {ml_per_sec} ml/sec")
+        for in_name, out_name in zip(in_names, out_names):
+            logger.info(f"Compensated flow: {in_name} and {out_name} set to {ml_per_sec} ml/sec")
 
 # --- Turbidostat/OD Control Utilities ---
 

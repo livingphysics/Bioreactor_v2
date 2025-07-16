@@ -2,7 +2,7 @@ import logging
 import time
 
 from src.bioreactor import Bioreactor
-from src.utils import measure_and_write_sensor_data
+from src.utils import measure_and_write_sensor_data, compensated_flow
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -12,10 +12,10 @@ DT = 1.0
 def main():
 
 
-    def job(bioreactor, elapsed):
-            measure_and_write_sensor_data(bioreactor, elapsed)
+    def flow_job(bioreactor, elapsed):
+            compensated_flow(bioreactor,'All', 0.020, elapsed)
     jobs = [
-        (job, DT, True)
+        (flow_job, DT, True)
     ]
 
     try:
