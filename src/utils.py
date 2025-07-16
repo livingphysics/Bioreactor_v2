@@ -1,6 +1,7 @@
 import csv
 import numpy as np
 from .config import Config as cfg
+import time
 
 # Standalone utility functions
 
@@ -107,7 +108,7 @@ def balanced_flow(bioreactor, pump_name, ml_per_sec, elapsed=None):
     if logger:
         logger.info(f"Balanced flow: {pump_name} and {converse} set to {ml_per_sec} ml/sec")
 
-def compensated_flow(bioreactor, pump_name, ml_per_sec, elapsed=None):
+def compensated_flow(bioreactor, pump_name, ml_per_sec, duration, elapsed=None):
     """
     For a given pump, set its flow and automatically set the converse pump
     to the same volumetric rate in the opposite direction.
@@ -137,8 +138,14 @@ def compensated_flow(bioreactor, pump_name, ml_per_sec, elapsed=None):
     
     for in_name, out_name in zip(in_names, out_names):
         bioreactor.change_pump(in_name, ml_per_sec)
+    time.sleep(duration)    
+    for in_name, out_name in zip(in_names, out_names):
+        bioreactor.change_pump(in_name, 0)
         bioreactor.change_pump(out_name, ml_per_sec*1.1)
-
+    time.sleep(duration)
+    for in_name, out_name in zip(in_names, out_names):
+        bioreactor.change_pump(out_name, 0*1.100)
+        
     if logger:
         for in_name, out_name in zip(in_names, out_names):
             logger.info(f"Compensated flow: {in_name} and {out_name} set to {ml_per_sec} ml/sec")

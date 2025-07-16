@@ -6,16 +6,17 @@ from src.utils import measure_and_write_sensor_data, compensated_flow
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-DURATION = 45000
-DT = 1.0
+DURATION = 1000
+DT = 30.0
+DOSE = 10.0
 
 def main():
 
 
     def flow_job(bioreactor, elapsed):
-            compensated_flow(bioreactor,'A_in', 0.020, elapsed)
+            compensated_flow(bioreactor,'All', 0.020, DOSE, elapsed)
     jobs = [
-        (flow_job, DT, True)
+        (flow_job, DT, DURATION)
     ]
 
     try:

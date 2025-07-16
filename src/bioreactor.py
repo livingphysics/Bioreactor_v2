@@ -258,7 +258,7 @@ class Bioreactor():
         intercept = cal.get('intercept')
         if gradient is None or intercept is None:
             raise ValueError(f"Calibration for pump '{pump_name}' direction '{direction}' missing 'gradient' or 'intercept'")
-        steps_per_sec = int((ml_per_sec - intercept) / gradient)
+        steps_per_sec = 8*int((ml_per_sec - intercept) / gradient)
         # Set velocity sign: positive if direction is 'forward', negative if 'reverse'
         velocity = steps_per_sec if direction == 'forward' else -steps_per_sec
         try:
