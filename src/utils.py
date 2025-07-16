@@ -120,17 +120,20 @@ def compensated_flow(bioreactor, pump_name, ml_per_sec, elapsed=None):
     if not bioreactor._initialized.get('pumps'):
         return
     
-    if pump_name.endswith('_in'):
-        in_names = pump_name
-        out_names = pump_name[:-3] + 'out'
+    if pump_name in ['A', 'B', 'C', 'D']:
+        in_names = [pump_name + '_in']
+        out_names = [pump_name + '_out']
+    elif pump_name.endswith('_in'):
+        in_names = [pump_name]
+        out_names = [pump_name[:-3] + 'out']
     elif pump_name.endswith('_out'):
-        in_names = pump_name[:-4] + 'in'
-        out_names = pump_name
+        in_names = [pump_name[:-4] + 'in']
+        out_names = [pump_name]
     elif pump_name.startswith('All'):
         in_names = ['A_in', 'B_in', 'C_in', 'D_in']
         out_names = ['A_out', 'B_out', 'C_out', 'D_out']
     else:
-        raise ValueError("Pump name must end with '_in' or '_out' or contain 'All'")
+        raise ValueError("Pump name must be A, B, C, D, end with '_in' or '_out', or contain 'All'")
     
     for in_name, out_name in zip(in_names, out_names):
         bioreactor.change_pump(in_name, ml_per_sec)
