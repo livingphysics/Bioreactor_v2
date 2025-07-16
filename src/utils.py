@@ -107,6 +107,34 @@ def balanced_flow(bioreactor, pump_name, ml_per_sec, elapsed=None):
     if logger:
         logger.info(f"Balanced flow: {pump_name} and {converse} set to {ml_per_sec} ml/sec")
 
+def compensated_flow(bioreactor, pump_name, ml_per_sec, elapsed=None):
+    """
+    For a given pump, set its flow and automatically set the converse pump
+    to the same volumetric rate in the opposite direction.
+    Args:
+        bioreactor: Bioreactor instance
+        pump_name: e.g. 'tube_1_in' or 'tube_1_out'
+        ml_per_sec: Desired flow rate in ml/sec (>= 0)
+    """
+    logger = getattr(bioreactor, 'logger', None)
+    if not bioreactor._initialized.get('pumps'):
+        return
+    
+    if pump_name.endswith('_in'):
+        in_name = pump_name
+        out_name = pump_name[:-3] + 'out'
+    elif pump_name.endswith('_out'):
+        in_name = pump_name[:-4] + 'in'
+        out_name = pump_name
+    else:
+        raise ValueError("Pump name must end with '_in' or '_out'")
+    
+    bioreactor.change_pump(in_name, ml_per_sec)
+    bioreactor.change_pump(out_name, ml_per_sec*1.1)
+
+    if logger:
+        logger.info(f"Balanced flow: {pump_name} and {converse} set to {ml_per_sec} ml/sec")
+
 # --- Turbidostat/OD Control Utilities ---
 
 class ExtendedKalmanFilter:
