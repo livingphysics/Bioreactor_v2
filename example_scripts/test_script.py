@@ -14,7 +14,7 @@ def main():
 
 
     def flow_job(bioreactor, elapsed):
-            compensated_flow(bioreactor,'All', 0.020, DOSE, elapsed)
+            compensated_flow(bioreactor,'All', 0.020, DOSE,DT, elapsed)
     jobs = [
         (flow_job, DT, DURATION)
     ]
