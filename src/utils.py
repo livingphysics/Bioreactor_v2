@@ -67,7 +67,7 @@ def pid_controller(bioreactor, setpoint, current_temp=None, kp=10.0, ki=1.0, kd=
 
     if current_temp is None:
         temps = bioreactor.get_vial_temp()
-        current_temp = temps[0]
+        current_temp = temps[3]
     error = setpoint - current_temp
     bioreactor._temp_integral += error * dt
     derivative = (error - bioreactor._temp_last_error) / dt if dt > 0 else 0.0

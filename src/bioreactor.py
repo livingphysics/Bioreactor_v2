@@ -158,6 +158,10 @@ class Bioreactor():
                     tic.exit_safe_start()
                     tic.set_step_mode(3)
                     tic.set_current_limit(32)
+                    tic.set_target_velocity(2000000)
+                    time.sleep(3.0)
+                    tic.set_target_velocity(0)
+                    tic.deenergize()
                     self.pumps[name] = tic
                     self.calibration[name] = {
                         'forward': settings['forward']
@@ -262,8 +266,15 @@ class Bioreactor():
         # Set velocity sign: positive if direction is 'forward', negative if 'reverse'
         velocity = steps_per_sec if direction == 'forward' else -steps_per_sec
         try:
-            self.pumps[pump_name].set_target_velocity(velocity)
-            self.logger.info(f"Set pump {pump_name} to {ml_per_sec} ml/sec (velocity {velocity}, direction {direction}).")
+            if velocity == 0:
+                self.pumps[pump_name].deenergize()
+                self.logger.info(f"Set pump {pump_name} to de-energized).")
+            else:
+                self.pumps[pump_name].energize()
+                self.pumps[pump_name].exit_safe_start()
+                time.sleep(0.01)
+                self.pumps[pump_name].set_target_velocity(velocity)
+                self.logger.info(f"Set pump {pump_name} to {ml_per_sec} ml/sec (velocity {velocity}, direction {direction}).")
         except Exception as e:
             self.logger.error(f"Error setting velocity for '{pump_name}': {e}")
             raise
