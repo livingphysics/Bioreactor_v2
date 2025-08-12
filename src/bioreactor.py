@@ -4,7 +4,6 @@ import threading
 import time
 from contextlib import contextmanager
 from typing import List, Tuple, Optional, Union
-from datetime import datetime
 
 import adafruit_ads7830.ads7830 as ADC
 import board
@@ -191,10 +190,7 @@ class Bioreactor():
         )
         fieldnames = ['time'] + [cfg.SENSOR_LABELS[k] for k in sensor_keys]
         self.fieldnames = fieldnames
-        # Add timestamp to filename
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        base_filename = getattr(cfg, 'DATA_OUT_FILE', 'bioreactor_data.csv')
-        out_file_path = f"{timestamp}_{base_filename}"
+        out_file_path = getattr(cfg, 'DATA_OUT_FILE', 'bioreactor_data.csv')
         self.out_file = open(out_file_path, 'w', newline='')
         self.writer = csv.DictWriter(self.out_file, fieldnames=fieldnames)
         self.writer.writeheader()
