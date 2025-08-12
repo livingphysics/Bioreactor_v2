@@ -13,10 +13,10 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # Temperature setpoint and PID gains (defaults match Bioreactor)
 T_SET = 30.0
 KP = 10.0
-KI = 1.0
+KI = 0.1
 KD = 0.0
 DT = 1.0  # seconds per loop
-DURATION = 45000  # seconds
+DURATION = 36000  # seconds
 
 def main():
     # Set up the plot
