@@ -127,6 +127,17 @@ class Bioreactor():
                 self.logger.error(f"Temperature sensors initialization failed: {e}")
                 self._initialized['temp'] = False
 
+        # Ambient temperature sensor
+        if self._init_components.get('ambient', True):
+            try:
+                from adafruit_pct2075 import PCT2075
+                self.ambient = PCT2075(self.i2c)
+                self._initialized['ambient'] = True
+                self.logger.info("Ambient temperature sensor initialized.")
+            except Exception as e:
+                self.logger.error(f"Ambient temperature sensor initialization failed: {e}")
+                self._initialized['ambient'] = False
+
         # Peltier
         if self._init_components.get('peltier', True):
             try:
@@ -187,6 +198,7 @@ class Bioreactor():
             [f'photodiode_{i+1}' for i in range(12)] +
             [f'io_temp_{i+1}' for i in range(2)] +
             [f'vial_temp_{i+1}' for i in range(4)] +
+            ['ambient_temp'] +
             ['peltier_current']
         )
         fieldnames = ['time'] + [cfg.SENSOR_LABELS[k] for k in sensor_keys]
@@ -344,6 +356,16 @@ class Bioreactor():
             return self.peltier_curr_sensor.current / 1000
         except Exception as e:
             self.logger.error(f"Error reading peltier current: {e}")
+            return float('nan')
+
+    def get_ambient_temp(self):
+        if not self._initialized.get('ambient'):
+            return float('nan')
+        
+        try:
+            return self.ambient.temperature
+        except Exception as e:
+            self.logger.error(f"Error reading ambient temperature: {e}")
             return float('nan')
 
     # Threaded scheduling

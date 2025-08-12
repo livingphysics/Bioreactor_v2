@@ -9,12 +9,13 @@ def measure_and_write_sensor_data(bioreactor, elapsed):
     """
     Get sensor measurements and log them to a CSV file.
     Args:
-        bioreactor: Bioreactor object with .writer, .get_photodiodes(), .get_io_temp(), .get_vial_temp(), .get_peltier_curr()
+        bioreactor: Bioreactor object with .writer, .get_photodiodes(), .get_io_temp(), .get_vial_temp(), .get_ambient_temp(), .get_peltier_curr()
         elapsed: float, elapsed time in seconds
     """
     photodiodes = bioreactor.get_photodiodes()
     io_temps = bioreactor.get_io_temp()
     vial_temps = bioreactor.get_vial_temp()
+    ambient_temp = bioreactor.get_ambient_temp()
     peltier_current = bioreactor.get_peltier_curr()
 
     # Pad lists to ensure correct length
@@ -43,6 +44,7 @@ def measure_and_write_sensor_data(bioreactor, elapsed):
         cfg.SENSOR_LABELS['vial_temp_2']: vial_temps[1],
         cfg.SENSOR_LABELS['vial_temp_3']: vial_temps[2],
         cfg.SENSOR_LABELS['vial_temp_4']: vial_temps[3],
+        cfg.SENSOR_LABELS['ambient_temp']: ambient_temp,
         cfg.SENSOR_LABELS['peltier_current']: peltier_current
     }
 

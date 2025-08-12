@@ -96,6 +96,7 @@ class Config:
         'ring_light': True,
         'optical_density': True, # includes io_temp_1 and io_temp_2
         'temp': True,
+        'ambient': True,  # Adafruit PCT2075 temperature sensor
         'peltier': True,
         'stirrer': True
     }
@@ -121,5 +122,6 @@ class Config:
         'vial_temp_2': 'vial_B_temp',
         'vial_temp_3': 'vial_C_temp',
         'vial_temp_4': 'vial_D_temp',
+        'ambient_temp': 'ambient_temp',
         'peltier_current': 'peltier_current',
     }
