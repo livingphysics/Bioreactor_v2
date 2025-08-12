@@ -21,9 +21,9 @@ DURATION = 36000  # seconds
 def main():
     # Set up the plot
     times = []
-    temperature = [[] for _ in range(4)]
+    temperature = [[] for _ in range(5)]
     fig, ax = plt.subplots(figsize=(10, 6))
-    lines = [ax.plot([], [], label=f'Sensor {i+1}')[0] for i in range(4)]
+    lines = [ax.plot([], [], label=f'Sensor {i+1}')[0] for i in range(5)]
     ax.set_xlabel('Time (s)')
     ax.set_title('Real-time Temperature Data')
     ax.legend(loc=3, fontsize=8, bbox_to_anchor=(0.2, 0.2))
@@ -36,6 +36,7 @@ def main():
         # Plotting
         times.append(elapsed)
         temps = bioreactor.get_vial_temp()
+        temps.append(bioreactor.get_ambient_temp())
         for i, temp in enumerate(temperature):
             temp.append(temps[i])
         for i, line in enumerate(lines):
