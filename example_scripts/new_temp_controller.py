@@ -16,7 +16,10 @@ KP = 10.0
 KI = 0.1
 KD = 0.0
 DT = 1.0  # seconds per loop
-DURATION = 36000  # seconds
+DURATION = 360000  # seconds
+
+FLOW_DT = 30.0
+FLOW_DOSE = 10.0
 
 def main():
     # Set up the plot
@@ -45,9 +48,12 @@ def main():
         ax.autoscale_view()
         # Save plot to file instead of interactive display
         plt.savefig('temperature_plot.png', dpi=150, bbox_inches='tight')
+        
+    def flow_job(bioreactor, elapsed):
+            compensated_flow(bioreactor,'All', 0.020, FLOW_DOSE,FLOW_DT, elapsed)
 
     jobs = [
-        (job, DT, True)
+        (job, DT, True), (flow_job, FLOW_DT, DURATION)
     ]
 
     try:
