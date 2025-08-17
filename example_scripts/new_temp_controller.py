@@ -6,7 +6,7 @@ matplotlib.use('Agg')  # Use non-interactive backend
 import matplotlib.pyplot as plt
 
 from src.bioreactor import Bioreactor
-from src.utils import measure_and_write_sensor_data, pid_controller
+from src.utils import measure_and_write_sensor_data, pid_controller, compensated_flow
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -50,10 +50,11 @@ def main():
         plt.savefig('temperature_plot.png', dpi=150, bbox_inches='tight')
         
     def flow_job(bioreactor, elapsed):
-            compensated_flow(bioreactor,'All', 0.020, FLOW_DOSE,FLOW_DT, elapsed)
+        compensated_flow(bioreactor,'All', 0.020, FLOW_DOSE,FLOW_DT, elapsed)
 
     jobs = [
-        (job, DT, True), (flow_job, FLOW_DT, DURATION)
+        (job, DT, True), 
+        (flow_job, FLOW_DT, DURATION)
     ]
 
     try:
