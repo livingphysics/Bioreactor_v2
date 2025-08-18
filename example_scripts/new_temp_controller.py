@@ -19,7 +19,7 @@ DT = 1.0  # seconds per loop
 DURATION = 360000  # seconds
 
 FLOW_DT = 30.0
-FLOW_DOSE = 10.0
+FLOW_DOSE = 2.0
 
 def main():
     # Set up the plot
