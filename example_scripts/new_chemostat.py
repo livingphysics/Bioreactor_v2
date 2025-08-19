@@ -3,8 +3,9 @@ import time
 import numpy as np
 
 import matplotlib
-matplotlib.use('Agg')  # Use non-interactive backend
+matplotlib.use('TkAgg')  # Use interactive backend for live plots
 import matplotlib.pyplot as plt
+plt.ion()  # Turn on interactive mode
 
 from src.bioreactor import Bioreactor
 from src.utils import measure_and_write_sensor_data, pid_controller, compensated_flow
@@ -53,6 +54,7 @@ def main():
     temp_ax.set_xlabel('Time (s)')
     temp_ax.set_title('Real-time Temperature Data')
     temp_ax.legend(loc=3, fontsize=8, bbox_to_anchor=(0.2, 0.2))
+    temp_ax.grid(True)
 
     # Set up the OD plot
     od_times = []
@@ -66,6 +68,10 @@ def main():
     od_ax.set_title('Real-time OD Data')
     od_ax.legend(loc='upper left', fontsize=8)
     od_ax.grid(True)
+    
+    # Show plots
+    plt.show()
+    plt.pause(0.1)  # Brief pause to ensure plots are displayed
 
     def temp_job(bioreactor, elapsed):
         """Temperature control job"""
@@ -82,8 +88,9 @@ def main():
             line.set_data(temp_times, temperature[i])
         temp_ax.relim()
         temp_ax.autoscale_view()
-        # Save temperature plot
-        temp_fig.savefig('temperature_plot.png', dpi=150, bbox_inches='tight')
+        # Update temperature plot
+        temp_fig.canvas.draw()
+        temp_fig.canvas.flush_events()
         
     def flow_job(bioreactor, elapsed):
         """Flow control job"""
@@ -165,8 +172,9 @@ def main():
             
             od_ax.relim()
             od_ax.autoscale_view()
-            # Save OD plot
-            od_fig.savefig('od_plot.png', dpi=150, bbox_inches='tight')
+            # Update OD plot
+            od_fig.canvas.draw()
+            od_fig.canvas.flush_events()
             
             logging.info(f"OD measurements at {elapsed}s: 135°={[f'{x:.3f}' for x in od_135[-1] if not np.isnan(x)]}, 180°={[f'{x:.3f}' for x in od_180[-1] if not np.isnan(x)]}")
 
