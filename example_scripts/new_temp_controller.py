@@ -16,7 +16,7 @@ KP = 10.0
 KI = 0.1
 KD = 0.0
 DT = 1.0  # seconds per loop
-DURATION = 360000  # seconds
+DURATION = 720000  # seconds
 
 FLOW_DT = 30.0
 FLOW_DOSE = 5.0
