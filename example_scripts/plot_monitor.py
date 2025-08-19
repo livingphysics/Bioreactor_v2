@@ -2,6 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import time
 import os
+import argparse
 from datetime import datetime
 
 def monitor_plots(csv_file='bioreactor_data.csv', update_interval=5):
@@ -135,4 +136,15 @@ def monitor_plots(csv_file='bioreactor_data.csv', update_interval=5):
         plt.show()
 
 if __name__ == '__main__':
-    monitor_plots()
+    parser = argparse.ArgumentParser(description='Monitor bioreactor data with live plots')
+    parser.add_argument('--file', '-f', default='bioreactor_data.csv', 
+                       help='CSV file to monitor (default: bioreactor_data.csv)')
+    parser.add_argument('--interval', '-i', type=float, default=5.0,
+                       help='Update interval in seconds (default: 5.0)')
+    
+    args = parser.parse_args()
+    
+    print(f"Starting monitor for file: {args.file}")
+    print(f"Update interval: {args.interval} seconds")
+    
+    monitor_plots(csv_file=args.file, update_interval=args.interval)
