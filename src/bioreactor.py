@@ -152,6 +152,20 @@ class Bioreactor():
                 self.logger.error(f"Peltier initialization failed: {e}")
                 self._initialized['peltier'] = False
 
+        # Relays
+        if self._init_components.get('relays', True):
+            try:
+                self.relays = {}
+                for i, (pin, name) in enumerate(zip(cfg.RELAY_PINS, cfg.RELAY_NAMES)):
+                    IO.setup(pin, IO.OUT)
+                    IO.output(pin, 0)  # Initialize relays to OFF state
+                    self.relays[name] = pin
+                    self.logger.info(f"Relay {name} initialized on pin {pin}.")
+                self._initialized['relays'] = True
+            except Exception as e:
+                self.logger.error(f"Relay initialization failed: {e}")
+                self._initialized['relays'] = False
+
         # Pumps
         if self._init_components.get('pumps', True):
             try:
@@ -260,6 +274,89 @@ class Bioreactor():
         except Exception as e:
             self.logger.error(f"Error changing peltier: {e}")
             raise
+
+    def change_relay(self, relay_name: str, state: bool) -> None:
+        """Change the state of a specific relay.
+        
+        Args:
+            relay_name (str): Name of the relay (e.g., 'relay_1', 'relay_2', etc.)
+            state (bool): True to turn ON, False to turn OFF
+        """
+        if not self._initialized.get('relays'):
+            self.logger.warning("Relays not initialized")
+            return
+            
+        if relay_name not in self.relays:
+            raise ValueError(f"No relay named '{relay_name}' configured. Available relays: {list(self.relays.keys())}")
+            
+        try:
+            pin = self.relays[relay_name]
+            IO.output(pin, 1 if state else 0)
+            self.logger.info(f"Relay {relay_name} turned {'ON' if state else 'OFF'} (pin {pin})")
+        except Exception as e:
+            self.logger.error(f"Error changing relay {relay_name}: {e}")
+            raise
+
+    def change_all_relays(self, state: bool) -> None:
+        """Change the state of all relays simultaneously.
+        
+        Args:
+            state (bool): True to turn all relays ON, False to turn all OFF
+        """
+        if not self._initialized.get('relays'):
+            self.logger.warning("Relays not initialized")
+            return
+            
+        try:
+            for relay_name, pin in self.relays.items():
+                IO.output(pin, 1 if state else 0)
+            self.logger.info(f"All relays turned {'ON' if state else 'OFF'}")
+        except Exception as e:
+            self.logger.error(f"Error changing all relays: {e}")
+            raise
+
+    def get_relay_state(self, relay_name: str) -> bool:
+        """Get the current state of a specific relay.
+        
+        Args:
+            relay_name (str): Name of the relay
+            
+        Returns:
+            bool: True if relay is ON, False if OFF
+        """
+        if not self._initialized.get('relays'):
+            self.logger.warning("Relays not initialized")
+            return False
+            
+        if relay_name not in self.relays:
+            raise ValueError(f"No relay named '{relay_name}' configured. Available relays: {list(self.relays.keys())}")
+            
+        try:
+            pin = self.relays[relay_name]
+            state = IO.input(pin) == 1
+            return state
+        except Exception as e:
+            self.logger.error(f"Error reading relay {relay_name} state: {e}")
+            return False
+
+    def get_all_relay_states(self) -> dict[str, bool]:
+        """Get the current state of all relays.
+        
+        Returns:
+            dict: Dictionary mapping relay names to their states (True=ON, False=OFF)
+        """
+        if not self._initialized.get('relays'):
+            self.logger.warning("Relays not initialized")
+            return {}
+            
+        try:
+            states = {}
+            for relay_name, pin in self.relays.items():
+                states[relay_name] = IO.input(pin) == 1
+            return states
+        except Exception as e:
+            self.logger.error(f"Error reading all relay states: {e}")
+            return {}
 
     def change_pump(self, pump_name: str, ml_per_sec: float) -> None:
         if not self._initialized.get('pumps'):
@@ -454,8 +551,17 @@ class Bioreactor():
             except Exception:
                 self.logger.error("Error stopping pumps.")
 
+        # Relays
+        if self._initialized.get('relays'):
+            try:
+                for relay_name, pin in self.relays.items():
+                    IO.output(pin, 0)  # Turn off all relays
+                self.logger.info("All relays turned off.")
+            except Exception:
+                self.logger.error("Error turning off relays.")
+
         # GPIO cleanup
-        if self._initialized.get('leds') or self._initialized.get('stirrer') or self._initialized.get('peltier'):
+        if self._initialized.get('leds') or self._initialized.get('stirrer') or self._initialized.get('peltier') or self._initialized.get('relays'):
             try:
                 IO.cleanup()
             except Exception:

@@ -21,6 +21,10 @@ class Config:
     STIRRER_SPEED: int = 1000
     DUTY_CYCLE: int = 55
 
+    # Relay Configuration
+    RELAY_PINS: list[int] = [19, 21, 29, 31]  # GPIO pins for relays
+    RELAY_NAMES: list[str] = ['relay_1', 'relay_2', 'relay_3', 'relay_4']  # Names for each relay
+
     # Ring Light Configuration
     RING_LIGHT_COUNT: int = 32
     RING_LIGHT_BRIGHTNESS: float = 0.2
@@ -98,6 +102,7 @@ class Config:
         'temp': True,
         'ambient': True,  # Adafruit PCT2075 temperature sensor
         'peltier': True,
+        'relays': True,
         'stirrer': True
     }
 
