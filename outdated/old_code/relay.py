@@ -2,7 +2,7 @@ import RPi.GPIO as IO
 import time
 
 IO.setmode(IO.BOARD)
-LED_Pins = [19, 21, 29, 31]
+LED_Pins = [21, 29, 31, 33]
 for LED_Pin in LED_Pins:
 	IO.setup(LED_Pin,IO.OUT)
 

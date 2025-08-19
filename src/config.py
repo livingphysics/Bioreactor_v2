@@ -22,7 +22,7 @@ class Config:
     DUTY_CYCLE: int = 55
 
     # Relay Configuration
-    RELAY_PINS: list[int] = [19, 21, 29, 31]  # GPIO pins for relays
+    RELAY_PINS: list[int] = [9,5,6,13]  # GPIO pins for relays
     RELAY_NAMES: list[str] = ['relay_1', 'relay_2', 'relay_3', 'relay_4']  # Names for each relay
 
     # Ring Light Configuration
