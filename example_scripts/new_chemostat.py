@@ -20,8 +20,8 @@ DT = 1.0  # seconds per loop
 DURATION = 720000  # seconds
 
 # Flow control parameters
-FLOW_DT = 360.0
-FLOW_DOSE = 28.0
+FLOW_DT = 90.0
+FLOW_DOSE = 14.0
 
 # OD measurement parameters
 OD_CALIBRATION_135 = 1.0  # Calibration factor for 135° sensors
