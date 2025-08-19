@@ -158,7 +158,7 @@ class Bioreactor():
                 self.relays = {}
                 for i, (pin, name) in enumerate(zip(cfg.RELAY_PINS, cfg.RELAY_NAMES)):
                     IO.setup(pin, IO.OUT)
-                    IO.output(pin, 0)  # Initialize relays to OFF state
+                    IO.output(pin, 1)  # Initialize relays to OFF state
                     self.relays[name] = pin
                     self.logger.info(f"Relay {name} initialized on pin {pin}.")
                 self._initialized['relays'] = True
@@ -291,7 +291,7 @@ class Bioreactor():
             
         try:
             pin = self.relays[relay_name]
-            IO.output(pin, 1 if state else 0)
+            IO.output(pin, 0 if state else 1)
             self.logger.info(f"Relay {relay_name} turned {'ON' if state else 'OFF'} (pin {pin})")
         except Exception as e:
             self.logger.error(f"Error changing relay {relay_name}: {e}")
@@ -309,7 +309,7 @@ class Bioreactor():
             
         try:
             for relay_name, pin in self.relays.items():
-                IO.output(pin, 1 if state else 0)
+                IO.output(pin, 0 if state else 1)
             self.logger.info(f"All relays turned {'ON' if state else 'OFF'}")
         except Exception as e:
             self.logger.error(f"Error changing all relays: {e}")
