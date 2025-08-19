@@ -143,7 +143,17 @@ def compensated_flow(bioreactor, pump_name, ml_per_sec, duration, dt, elapsed=No
     time.sleep(duration)    
     for in_name, out_name in zip(in_names, out_names):
         bioreactor.change_pump(in_name, 0)
+    
+    # Turn on all relays during the flow operation
+    if bioreactor._initialized.get('relays'):
+        bioreactor.change_all_relays(True)
+    
     time.sleep(dt-2*duration)
+    
+    # Turn off all relays after the flow operation
+    if bioreactor._initialized.get('relays'):
+        bioreactor.change_all_relays(False)
+    
     for in_name, out_name in zip(in_names, out_names):
         bioreactor.change_pump(out_name, ml_per_sec*1.1)
     time.sleep(duration)
