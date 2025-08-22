@@ -38,7 +38,7 @@ def main():
     # Define jobs with their intervals and durations
     jobs = [
         (temp_job, DT, True),                    # Temperature control every DT seconds
-        (flow_job, FLOW_DT, DURATION),           # Flow control every FLOW_DT seconds
+        # (flow_job, FLOW_DT, DURATION),           # Flow control every FLOW_DT seconds
         (data_job, DATA_DT, True)                # Data logging every DATA_DT seconds
     ]
 
