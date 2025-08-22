@@ -19,7 +19,7 @@ FLOW_DT = 90.0
 FLOW_DOSE = 14.0
 
 # Data logging parameters
-DATA_DT = 10.0  # seconds between data logging
+DATA_DT = 30.0  # seconds between data logging
 
 def main():
     def temp_job(bioreactor, elapsed):
