@@ -71,9 +71,16 @@ def pid_controller(bioreactor, setpoint, current_temp=None, kp=10.0, ki=1.0, kd=
         temps = bioreactor.get_vial_temp()
         current_temp = temps[3]
     error = setpoint - current_temp
-    bioreactor._temp_integral += error * dt
-    derivative = (error - bioreactor._temp_last_error) / dt if dt > 0 else 0.0
-    output = kp * error + ki * bioreactor._temp_integral + kd * derivative
+    
+    # Only update integral if error is not NaN
+    if not np.isnan(error):
+        bioreactor._temp_integral += error * dt
+        derivative = (error - bioreactor._temp_last_error) / dt if dt > 0 else 0.0
+        output = kp * error + ki * bioreactor._temp_integral + kd * derivative
+    else:
+        # If error is NaN, skip integral update and set output to NaN
+        derivative = 0.0
+        output = float('nan')
 
     if not np.isnan(output):
         duty = max(0, min(100, int(abs(output))))
