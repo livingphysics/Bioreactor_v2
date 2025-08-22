@@ -75,14 +75,19 @@ def pid_controller(bioreactor, setpoint, current_temp=None, kp=10.0, ki=1.0, kd=
     derivative = (error - bioreactor._temp_last_error) / dt if dt > 0 else 0.0
     output = kp * error + ki * bioreactor._temp_integral + kd * derivative
 
-    duty = max(0, min(100, int(abs(output))))
-    forward = (output >= 0)
-    if hasattr(bioreactor, 'change_peltier'):
-        bioreactor.change_peltier(duty, forward)
-    bioreactor._temp_last_error = error
+    if not np.isnan(output):
+        duty = max(0, min(100, int(abs(output))))
+        forward = (output >= 0)
+        if hasattr(bioreactor, 'change_peltier'):
+            bioreactor.change_peltier(duty, forward)
+        bioreactor._temp_last_error = error
 
-    if logger:
-        logger.info(f"PID controller: setpoint={setpoint}, current_temp={current_temp}, output={output}, duty={duty}, forward={forward}")
+        if logger:
+            logger.info(f"PID controller: setpoint={setpoint}, current_temp={current_temp}, output={output}, duty={duty}, forward={forward}")
+    else:
+        # Skip peltier update if output is NaN
+        if logger:
+            logger.warning(f"PID controller: NaN output detected, skipping peltier update. setpoint={setpoint}, current_temp={current_temp}")
 
 def balanced_flow(bioreactor, pump_name, ml_per_sec, elapsed=None):
     """
