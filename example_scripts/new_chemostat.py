@@ -7,11 +7,11 @@ from src.utils import measure_and_write_sensor_data, pid_controller, compensated
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Temperature setpoint and PID gains (defaults match Bioreactor)
-T_SET = 30.0
-KP = 10.0
-KI = 0.1
+T_SET = 27.5
+KP = 7.0
+KI = 0.05
 KD = 0.0
-DT = 1.0  # seconds per loop
+DT = 5.0  # seconds per loop
 DURATION = 720000  # seconds
 
 # Flow control parameters
