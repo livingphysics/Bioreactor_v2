@@ -8,8 +8,8 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 # Temperature setpoint and PID gains (defaults match Bioreactor)
 T_SET = 27.0
-KP = 10.0
-KI = 0.01
+KP = 5.0
+KI = 0.005
 KD = 0.0
 DT = 5.0  # seconds per loop
 DURATION = 720000  # seconds
