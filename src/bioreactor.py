@@ -1,5 +1,6 @@
 import csv
 import logging
+import os
 import threading
 import time
 from contextlib import contextmanager
@@ -217,10 +218,15 @@ class Bioreactor():
         )
         fieldnames = ['time'] + [cfg.SENSOR_LABELS[k] for k in sensor_keys]
         self.fieldnames = fieldnames
-        # Add timestamp to filename
+        # Add timestamp to filename and create bioreactor_data directory
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         base_filename = getattr(cfg, 'DATA_OUT_FILE', 'bioreactor_data.csv')
-        out_file_path = f"{timestamp}_{base_filename}"
+        
+        # Ensure bioreactor_data directory exists
+        data_dir = 'bioreactor_data'
+        os.makedirs(data_dir, exist_ok=True)
+        
+        out_file_path = os.path.join(data_dir, f"{timestamp}_{base_filename}")
         self.out_file = open(out_file_path, 'w', newline='')
         self.writer = csv.DictWriter(self.out_file, fieldnames=fieldnames)
         self.writer.writeheader()
